@@ -13,39 +13,40 @@ alias activate2 r2 # tempVariable
 alias doorState r5 # state of Door
 s outDoor Lock 1 #disable door control
 s inDoor Lock 1 #disable door control
-main: #mail loop
-# read out if a button is pressed
+main: #main loop
+# read out if a button is pressed and save it into
+# activate0/1/2
 l activate0 dBtnAirLock Setting
 l activate1 dBtnInside Setting
 l activate2 dBtnOutside Setting
 # just run execute if a button pressed
-beq activate0 1 execute
-beq activate1 1 execute
-beq activate2 1 execute
+beq activate0 1 execute #execute if activate0 is 1
+beq activate1 1 execute #execute if activate1 is 1
+beq activate2 1 execute #execute if activate2 is 1
 j main #jump to main if no button was pressed 
 
 execute:
-yield # wait for 0.5 sek. This is necessary
-#kind of a if-swich
+yield # wait for 0.5 sek. Important!
+#kind of an if-swich
 #run openIndoor if doorState is 1
 beq doorState 1 openIndoor
 #run openIndoor if doorState is 0
 beq doorState 0 openOutdoor
 
 openIndoor:
-s warningLight On 1 #turn on warningLight
-s outDoor Open 0 # close outer door
-sleep 1 # wait to door is closed
-s inDoor Open 1 # open inner door
-move doorState 0 # save current door state
-s warningLight On 0 #turn off warningLight
+s warningLight On 1 #turn on flashLight
+s outDoor Open 0 #close outer door
+sleep 1 # wait for door is closed
+s inDoor Open 1 #open inner door
+move doorState 0 #save current door state
+s warningLight On 0 #turn off flashLight
 j main #jump to main
 
 openOutdoor:
-s warningLight On 1 #turn on warningLight
+s warningLight On 1 #turn on flashLight
 s inDoor Open 0 #close inner door
-sleep 1 # wait to door is closed
-s outDoor Open 1 # open outer door
-move doorState 1 # save current door state
-s warningLight On 0 #turn off warningLight
+sleep 1 # wait for door is closed
+s outDoor Open 1 #open outer door
+move doorState 1 #save current door state
+s warningLight On 0 #turn off flashLight
 j main #jump to main
