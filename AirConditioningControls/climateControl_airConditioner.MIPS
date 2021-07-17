@@ -1,4 +1,4 @@
-#simple climate controll with a airConditioner.
+#simple climate control with a airConditioner.
 #airConditioner is turned on if indoorTemp
 #a above 0 °C and is turned off if indoorTemp
 #is below 0 °C.
