@@ -1,0 +1,51 @@
+# simple AirLock without justment of air pressure
+# just to keep out atmosphere.
+## setup ##
+alias outDoor d0 #OuterDoor
+alias inDoor d1 # InnerDoor
+alias dBtnAirLock d2 #Button
+alias dBtnInside d3 #Button
+alias dBtnOutside d4 #Button
+alias warningLight d5 #FlashLight
+alias activate0 r0 # tempVariable
+alias activate1 r1 # tempVariable
+alias activate2 r2 # tempVariable
+alias doorState r5 # state of Door
+s outDoor Lock 1 #disable door control
+s inDoor Lock 1 #disable door control
+main: #mail loop
+# read out if a button is pressed
+l activate0 dBtnAirLock Setting
+l activate1 dBtnInside Setting
+l activate2 dBtnOutside Setting
+# just run execute if a button pressed
+beq activate0 1 execute
+beq activate1 1 execute
+beq activate2 1 execute
+j main #jump to main if no button was pressed 
+
+execute:
+yield # wait for 0.5 sek. This is necessary
+#kind of a if-swich
+#run openIndoor if doorState is 1
+beq doorState 1 openIndoor
+#run openIndoor if doorState is 0
+beq doorState 0 openOutdoor
+
+openIndoor:
+s warningLight On 1 #turn on warningLight
+s outDoor Open 0 # close outer door
+sleep 1 # wait to door is closed
+s inDoor Open 1 # open inner door
+move doorState 0 # save current door state
+s warningLight On 0 #turn off warningLight
+j main #jump to main
+
+openOutdoor:
+s warningLight On 1 #turn on warningLight
+s inDoor Open 0 #close inner door
+sleep 1 # wait to door is closed
+s outDoor Open 1 # open outer door
+move doorState 1 # save current door state
+s warningLight On 0 #turn off warningLight
+j main #jump to main
