@@ -1,0 +1,27 @@
+# a simple climate control #
+# Turns on airPump if indoor temperature is 
+# above 0 °C and turns of airPump if indoor
+# temperature is below 0 °C.
+## SETUP ##
+alias gasSensor d0 # for read out temp
+alias gasPump d1 #
+alias tempK r0 # temperature in Kelvin
+alias tempC r1 # temperature in Celsius
+
+main: #main loop
+l tempK gasSensor Temperature # read temperature
+sub tempC tempK 273.15 # convert to Celsius
+round tempC tempC #
+yield # wait for 0.5 sek
+bgez tempC setON # temp >= 0 jump to line setON
+bltz tempC setOFF # temp < 0 jump to line setOFF
+
+setON: #activate airPump
+s gasPump Setting 40 # set volume to 40
+s gasPump On 1 # turn pump on
+j main #jump back to main
+
+setOFF: #deactivate airPump
+s gasPump Setting 0 # set volume to 0
+s gasPump On 0 # turn pump off
+j main #jump back to main
