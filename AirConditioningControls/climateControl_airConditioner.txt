@@ -1,0 +1,24 @@
+#simple climate controll with a airConditioner.
+#airConditioner is turned on if indoorTemp
+#a above 0 °C and is turned off if indoorTemp
+#is below 0 °C.
+## SETUP ##
+alias gasSensor d0 # for read out indoor temp
+alias airCondi1 d1 #primary airConditioner
+alias tempK r0 #temp in Kelvin
+alias tempC r1 #temp in Celsius
+main:
+l tempK gasSensor Temperature # read temperature
+sub tempC tempK 273.15 # convert to Celsius
+round tempC tempC
+yield # wait for 0.5 sek
+bgez tempC setON # temp >= 0 jump to line setON
+bltz tempC setOFF # temp < 0 jump to line setOFF
+
+setON:
+s airCondi1 On 1 # set air conditioner OFF
+j main
+
+setOFF:
+s airCondi1 On 0 # set air conditioner ON
+j main
