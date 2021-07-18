@@ -1,0 +1,61 @@
+# This script automatically turns the Sslarpanels
+# into the sunLight. Two sun sensors are used
+# to detect the position of the sun.
+###############################
+# SolarSensor 1 has to be placed horizontally.
+# It's sensing "grid sunlight": day or night.
+# Param for day/night is "Activate".
+# Where:
+# Activate 0 = day and Activate 1 = night
+# SolarSensor 2 has to be placed vertically.
+# It's sensing solarAngle. SolarAngle (A) moves
+# from 180  to 0 .
+# Where:
+# 180  = sunrise and 0  = sunset (may change)
+# SolarPanel can be turned from 165  to 15 deg.
+# Where 165 deg = 100 % and 15 deg = 0 %
+# Formular for calcutation panel position "Y" is:
+# Y  = ((A - 15) * 150) * 100 [unit: percent]
+###############################
+## SETUP ##
+alias solarSensorGrid d0 #(for day/night detec.)
+alias solarSensorAngle d1 #(for SolarAngle detec.)
+#alias solarPanel d2 # just for testing
+#save Prefab Hash for SolarPanels
+alias solarPanelHash r0
+#read out hash with "configuration cartrige" on
+#your tablet or use stationPedia
+move solarPanelHash -2045627372 #<= hash
+alias dayState r1 # state day
+alias solarAngle r2 # from 180 to 0 degree
+alias panelPosition r3
+main:
+yield # wait for 0.5 sec.
+#read out day/night state from sensor. 0 = night
+l dayState solarSensorGrid Activate
+# during night solar panel where set to init pos.
+beq dayState 0 setAngle100
+
+##we have day time ## (dayState == 1)
+# read out solar angle
+l solarAngle solarSensorAngle SolarAngle
+#calculate panel position. See equation above.
+sub solarAngle solarAngle 15 #( B = A - 15)
+div panelPosition solarAngle 150 #( C = B * 150 )
+mul panelPosition panelPosition 100 #( Y = C/100)
+j setAngleXY #jump to setAngleXY
+
+
+##sets positon to solar panel to 100%
+setAngle100:
+#s solarPanel Vertical 100 #for single panel
+sb solarPanelHash Vertical 100 #for all panles
+j main #jump back to main loop
+
+
+##sets positon to solar panel to panelPosition
+##(calcutated value)
+setAngleXY:
+#s solarPanel Vertical panelPosition #for single
+sb solarPanelHash Vertical panelPosition #for all
+j main #jump back to main loop
