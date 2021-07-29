@@ -1,0 +1,32 @@
+# A simple ArcFurnace control #####################
+# 1 ArcFurnance, 2 Chute (Input/Output)!
+# The counter between the input chute and the
+# output chute is compared. If the output is below
+# the input, the furnace is switched on.
+########################################
+# config #
+alias arcFurnace d0
+alias inputChute d1
+alias outputChute d2
+alias inputCount r0
+alias outputCount r1
+# program #
+main:
+yield
+
+l inputCount inputChute ImportCount
+l outputCount outputChute ImportCount
+# if inputCount < outputCount turnFurnaceOn
+blt outputCount inputCount turnFurnaceOn
+# else
+j turnFurnaceOff
+
+
+turnFurnaceOn:
+s arcFurnace On 1
+s arcFurnace Activate 1
+j main
+
+turnFurnaceOff:
+s arcFurnace On 0
+j main
