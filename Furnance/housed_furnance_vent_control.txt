@@ -1,0 +1,46 @@
+################################
+# The room pressure can be changed by using a
+# turbo pump. The preferred air pressure is set 
+# via a rotary switch.
+################################
+## config ##
+alias pump d0 # turbo pumpo
+alias airSensor d1 #air pressure/temp sensor
+alias dial d2 # for setting target pressure
+alias targetPressure r0 # read out from dial
+alias currentPressure r1 # read out from sensor
+#set save defaults for pump #
+s pump Setting 50 # volume l/s
+s pump Mode 0 # 0 = outWards
+s pump On 0
+
+main:
+yield # wait for 0.5 sec.
+# load value from dial. This Value is interpreted
+# as target value for air pressure inside box
+l targetPressure dial Setting
+# load current pressure from sensor
+l currentPressure airSensor Pressure
+round currentPressure currentPressure
+
+# if airPressure above dial setting: pump out
+bgt currentPressure targetPressure pumpOut
+# if airPressure below dial setting: pump in
+blt currentPressure targetPressure pumpIn
+# do nothing when airPressure equal dial setting
+j pumpStop
+
+
+pumpOut:
+s pump On 1
+s pump Mode 0 # 0 = outWards
+j main
+
+pumpIn:
+s pump On 1
+s pump Mode 1 # 1 = InWards
+j main
+
+pumpStop:
+s pump On 0
+j main
