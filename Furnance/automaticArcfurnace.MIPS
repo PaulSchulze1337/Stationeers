@@ -4,6 +4,7 @@
 ########################################
 # config #
 alias arcFurnace d0
+alias occupience r0
 # program #
 main:
 yield
