@@ -1,23 +1,19 @@
-# A simple ArcFurnace control #####################
-# 1 ArcFurnance, 2 Chute (Input/Output)!
-# The counter between the input chute and the
-# output chute is compared. If the output is below
-# the input, the furnace is switched on.
+# A simple ArcFurnace control ##########
+# The state of occupancy is read and the furnace is
+#  turned on when the input slot is occupied. 
 ########################################
 # config #
 alias arcFurnace d0
-alias inputChute d1
-alias outputChute d2
-alias inputCount r0
-alias outputCount r1
 # program #
 main:
 yield
 
-l inputCount inputChute ImportCount
-l outputCount outputChute ImportCount
-# if inputCount < outputCount turnFurnaceOn
-blt outputCount inputCount turnFurnaceOn
+# loads occupience state of furnance and save
+# it into "occupience". InputSlot = 0
+ls occupience arcFurnace 0 Occupied
+
+# if occupience = 1 ==> it's occupied! => burn it!
+beq occupience 1 turnFurnaceOn
 # else
 j turnFurnaceOff
 
