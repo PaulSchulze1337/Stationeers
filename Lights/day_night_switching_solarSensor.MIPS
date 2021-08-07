@@ -1,0 +1,25 @@
+####################################################
+# Lights where turned on during night. Day-night-
+# cycle is deteced with a solar sensor. All lights
+# with same hash where switched on.
+# Note: Put all your lights in a separate network
+####################################################
+##setup##
+alias solarSensor d0
+alias dayState r0
+alias lightsHash r1
+move lightsHash 1847265835 #Light Long Angled
+##program##
+main:
+yield
+l dayState solarSensor Activate #0 = night
+beq dayState 0 turnLightOn
+j turnLightOff
+
+turnLightOn:
+sb lightsHash On 1 #for all lights
+j main
+
+turnLightOff:
+sb lightsHash On 0 #for all lights
+j main
