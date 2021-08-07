@@ -9,7 +9,7 @@ alias airSensor d1 #air pressure/temp sensor
 alias targetPressure r0
 alias currentPressure r1
 #set save defaults for pump #
-s pump Setting 100 # volume l/s
+s pump Setting 250 # volume l/s
 s pump Mode 0 # 0 = outWards
 s pump On 0
 move targetPressure 10 # KPa (pressure Preset )
