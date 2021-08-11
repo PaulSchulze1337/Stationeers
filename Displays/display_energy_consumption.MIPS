@@ -1,0 +1,16 @@
+###########################################
+# displays energy consumption of a network
+# energy consuption is read out form a cable
+# analyer
+############################################
+alias cableAnalyser d0
+alias display d1
+alias eConsumption r0
+
+##program##
+main:
+yield
+l eConsumption cableAnalyser PowerActual
+round eConsumption eConsumption
+s display Setting eConsumption
+j main
