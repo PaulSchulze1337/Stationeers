@@ -18,6 +18,7 @@ move batteryHash -400115994 #station battery
 
 ##programm##
 main:
+yield
 #read out maximum capacity of batteries
 lb maximumEnergy batteryHash Maximum Sum
 #read out current charing state of batteries
