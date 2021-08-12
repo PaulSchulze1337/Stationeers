@@ -1,0 +1,23 @@
+#################################################
+# we receive a numberous values via logic trans-
+# mitter and displaying this value onto a display
+#################################################
+##config##
+alias display d0
+alias logicTransmitter d1
+##variables##
+# value to display is transmitted via logic trans-
+# mitter. It can be any number
+alias valueToDisplay r0
+
+##program##
+main:
+yield # wait for 0.5 sek.
+
+# loading value from logic transmitter.
+# in this case we are displaying battery state
+l valueToDisplay logicTransmitter Setting
+# writing value into display
+s display Setting batteryState
+
+j main
