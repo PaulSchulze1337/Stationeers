@@ -4,7 +4,7 @@
 # ores where put out on left slot. The ores where
 # detected using there hash vales.
 ###################################################
-##config##
+###config###
 alias sorter d0
 #alias ledDebug d1
 alias occupienceState r0
