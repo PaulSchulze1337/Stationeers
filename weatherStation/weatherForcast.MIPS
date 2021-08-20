@@ -1,0 +1,34 @@
+
+alias weatherStation d0
+alias speaker d1
+alias debugDisplay d2
+
+alias timeToStorm r0
+alias speakerIsPlaying r1
+
+# just for speaker testing. Set On to 1.
+s speaker Mode 0
+s speaker On 0
+
+main:
+yield # pauses for 0.5 seconds
+# load time to next storm
+l timeToStorm weatherStation NextWeatherEventTime
+s debugDisplay Setting timeToStorm
+
+beqz timeToStorm deactiveAlarm # equal 0
+bgtz timeToStorm activateAlarm # grater then 0
+j main
+
+deactiveAlarm:
+move speakerIsPlaying 0
+s speaker On 0
+j main
+
+activateAlarm:
+# jump back to main if speaker is playing
+beq speakerIsPlaying 1 main
+# set speaker to playing
+move speakerIsPlaying 1
+s speaker On 1
+j main
