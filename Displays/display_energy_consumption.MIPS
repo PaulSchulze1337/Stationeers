@@ -1,16 +1,42 @@
-###########################################
-# displays energy consumption of a network
-# energy consuption is read out form a cable
-# analyer
-############################################
-alias cableAnalyser d0
-alias display d1
-alias eConsumption r0
+#################################################
+# We are displaying current energy consumtion and
+# current battery charging state.
+# Current energy consumtion is read out from a
+# cable analyser
+# We receive a numberous values via logic trans-
+# mitter and displaying this value onto a display
+# In this case we are displaying battery state.
+#################################################
+##config##
+alias logicTransmitter d0
+alias displayBatteryCharge d1
+alias cableAnalyser d2
+alias displayEnergyCons d3
+
+##variables##
+alias batteryState r0
+# value to display is transmitted via logic trans-
+# mitter. It can be any number
+alias valueToDisplay r1
+alias energyConsumption r2
 
 ##program##
 main:
-yield
-l eConsumption cableAnalyser PowerActual
-round eConsumption eConsumption
-s display Setting eConsumption
+yield # wait for 0.5 sek.
+# load current energyConsumption from cable analyer
+l energyConsumption cableAnalyser PowerActual #[W]
+# calculate W to Kw in two steps
+div energyConsumption energyConsumption 100 #[hW]
+round energyConsumption energyConsumption
+div energyConsumption energyConsumption 10 #[kW]
+# writes energy consumption to display
+s displayEnergyCons Setting energyConsumption #[kW]
+
+# loading value from logic transmitter.
+# in this case we are displaying battery state
+l valueToDisplay logicTransmitter Setting #[%]
+# writing value onto display
+s displayBatteryCharge Setting valueToDisplay #[%]
+
+#s display Setting eConsumption
 j main
