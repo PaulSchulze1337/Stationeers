@@ -1,34 +1,69 @@
-
+# We get a weather warning around 660 seconds
+# before strom.
 alias weatherStation d0
 alias speaker d1
 alias debugDisplay d2
+alias debugButton d3
 
 alias timeToStorm r0
 alias speakerIsPlaying r1
+alias flashLightHash r2
+alias speakerHash r3
+alias activateBtn r4
+
+move flashLightHash -1535893860
+move speakerHash -828056979 #Klaxon speaker
 
 # just for speaker testing. Set On to 1.
-s speaker Mode 0
-s speaker On 0
+sb speakerHash Mode 0 #for alarm1
+sb speakerHash On 0
 
 main:
 yield # pauses for 0.5 seconds
+l activateBtn debugButton Setting
+# for debuging
+beq activateBtn 1 activateSpeach
+
 # load time to next storm
 l timeToStorm weatherStation NextWeatherEventTime
 s debugDisplay Setting timeToStorm
 
 beqz timeToStorm deactiveAlarm # equal 0
+bgtz timeToStorm activateFlash # grater then 0
+main2:
+# from here timeToStrom can't be 0
+beq timeToStorm 700 activateSpeach # <= 700
+beq timeToStorm 600 activateSpeach # <= 600
+beq timeToStorm 500 activateSpeach # <= 500
+beq timeToStorm 400 activateSpeach # <= 400
+beq timeToStorm 300 activateSpeach # <= 300
+beq timeToStorm 200 activateSpeach # <= 200
+beq timeToStorm 100 activateSpeach # <= 100
 bgtz timeToStorm activateAlarm # grater then 0
 j main
 
+
+activateFlash:
+sb flashLightHash On 1
+j main2
+
 deactiveAlarm:
 move speakerIsPlaying 0
-s speaker On 0
+sb speakerHash On 0
+sb flashLightHash On 0 #turn off warningLight
 j main
+
+activateSpeach:
+sb speakerHash Mode 18 # 18 = "StormIncoming"
+sb speakerHash On 1
+j main
+
 
 activateAlarm:
 # jump back to main if speaker is playing
 beq speakerIsPlaying 1 main
 # set speaker to playing
 move speakerIsPlaying 1
-s speaker On 1
+sb speakerHash Mode 0
+sb speakerHash On 1
 j main
