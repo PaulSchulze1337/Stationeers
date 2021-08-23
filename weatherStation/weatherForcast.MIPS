@@ -39,6 +39,7 @@ beq activateBtn 1 activateSpeach
 
 # load time in seconds to next storm
 l timeToStorm weatherStation NextWeatherEventTime
+round timeToStorm timeToStorm
 # display time to storm on a display
 s debugDisplay Setting timeToStorm
 
@@ -70,6 +71,7 @@ j main
 activateSpeach:
 sb speakerHash Mode 18 # 18 = "StormIncoming"
 sb speakerHash On 1
+sleep 1
 j main
 
 
