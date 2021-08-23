@@ -1,55 +1,69 @@
+# Alarm the station of an incoming storm event.
+# The first 10 min, there is one alarm every
+# 100 seconds. 100 Seconds before the storm arives
+# a sirene is alarming.
+# We need a weather station for a storm forcast.
 # We get a weather warning around 660 seconds
 # before strom.
+##################################################
+## config ##
 alias weatherStation d0
 alias speaker d1
-alias debugDisplay d2
-alias debugButton d3
+alias debugDisplay d2  # for debugging
+alias debugButton d3 # for debugging
 
-alias timeToStorm r0
-alias speakerIsPlaying r1
+alias timeToStorm r0 # in seconds
+alias speakerIsPlaying r1 # 1 = isPlaying
+
 alias flashLightHash r2
 alias speakerHash r3
-alias activateBtn r4
+alias activateBtn r4 # for debugging
 
 move flashLightHash -1535893860
 move speakerHash -828056979 #Klaxon speaker
 
+## debugging tool ##
 # just for speaker testing. Set On to 1.
 sb speakerHash Mode 0 #for alarm1
 sb speakerHash On 0
+##################################################
 
+## programm ##
 main:
 yield # pauses for 0.5 seconds
+sb speakerHash Volume 100 # 100 = max
+# load button state for debugging
 l activateBtn debugButton Setting
-# for debuging
+# execute routine for debuging
 beq activateBtn 1 activateSpeach
 
-# load time to next storm
+# load time in seconds to next storm
 l timeToStorm weatherStation NextWeatherEventTime
+# display time to storm on a display
 s debugDisplay Setting timeToStorm
 
+# deactive alarm if time no storm is comming
 beqz timeToStorm deactiveAlarm # equal 0
-bgtz timeToStorm activateFlash # grater then 0
-main2:
+# flash light is flashing to hole time the strom
+# is coming
+sb flashLightHash On 1
 # from here timeToStrom can't be 0
-beq timeToStorm 700 activateSpeach # <= 700
-beq timeToStorm 600 activateSpeach # <= 600
-beq timeToStorm 500 activateSpeach # <= 500
-beq timeToStorm 400 activateSpeach # <= 400
-beq timeToStorm 300 activateSpeach # <= 300
-beq timeToStorm 200 activateSpeach # <= 200
-beq timeToStorm 100 activateSpeach # <= 100
+beq timeToStorm 700 activateSpeach # = 700 sek
+beq timeToStorm 600 activateSpeach # = 600 sek
+beq timeToStorm 500 activateSpeach # = 500 sek
+beq timeToStorm 400 activateSpeach # = 400 sek
+beq timeToStorm 300 activateSpeach # = 300 sek
+beq timeToStorm 200 activateSpeach # = 200 sek
+beq timeToStorm 100 activateSpeach # = 100 sek
+# jump back to main if time >= 100
+bge timeToStorm 100 main # >= 100 sek
+# from here timeToStrom is < 100
 bgtz timeToStorm activateAlarm # grater then 0
 j main
 
-
-activateFlash:
-sb flashLightHash On 1
-j main2
-
 deactiveAlarm:
 move speakerIsPlaying 0
-sb speakerHash On 0
+sb speakerHash On 0 # turn off speaker
 sb flashLightHash On 0 #turn off warningLight
 j main
 
@@ -60,10 +74,10 @@ j main
 
 
 activateAlarm:
-# jump back to main if speaker is playing
+# jump back to main if speaker is allready playing
 beq speakerIsPlaying 1 main
 # set speaker to playing
 move speakerIsPlaying 1
-sb speakerHash Mode 0
+sb speakerHash Mode 0 # 0 = Alarm1
 sb speakerHash On 1
 j main
