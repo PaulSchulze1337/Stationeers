@@ -7,20 +7,20 @@
 # before strom.
 ##################################################
 ## config ##
-alias weatherStation d0
-alias speaker d1
-alias debugDisplay d2  # for debugging
-alias debugButton d3 # for debugging
+alias debugDisplay d0  # shows time to storm
+#alias debugButton d3 #uncomment thii for debugging
 
 alias timeToStorm r0 # in seconds
 alias speakerIsPlaying r1 # 1 = isPlaying
 
-alias flashLightHash r2
-alias speakerHash r3
-alias activateBtn r4 # for debugging
+alias wStaHash r2 #weather station hash
+alias flashLightHash r3
+alias speakerHash r4
+alias activateBtn r5 # for debugging
 
-move flashLightHash -1535893860
-move speakerHash -828056979 #Klaxon speaker
+move wStaHash 1997212478 #weather station hash
+move flashLightHash -1535893860 # flash ligth hash
+move speakerHash -828056979 #Klaxon speaker hash
 
 ## debugging tool ##
 # just for speaker testing. Set On to 1.
@@ -33,12 +33,12 @@ main:
 yield # pauses for 0.5 seconds
 sb speakerHash Volume 100 # 100 = max
 # load button state for debugging
-l activateBtn debugButton Setting
+#l activateBtn debugButton Setting #uncomment this
 # execute routine for debuging
-beq activateBtn 1 activateSpeach
+#beq activateBtn 1 activateSpeach #uncomment this
 
 # load time in seconds to next storm
-l timeToStorm weatherStation NextWeatherEventTime
+lb timeToStorm wStaHash NextWeatherEventTime Minimum
 round timeToStorm timeToStorm
 # display time to storm on a display
 s debugDisplay Setting timeToStorm
