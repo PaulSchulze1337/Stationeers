@@ -1,3 +1,8 @@
+##################################################
+#
+# NOTE: THIS SCRIPT NO LONGER WORKS!!!
+# SolarAngle will be deprecated soon 
+#
 # This script automatically turns the SolarPanel
 # into the sunlight. Two sun sensors are used
 # to detect the position of the sun.
@@ -10,7 +15,7 @@
 # SolarAngle ranges from 180 to 0 degree.
 # Where:
 # 180  = sunrise and 0  = sunset (can change)
-###################################################
+##################################################
 # SolarPanel can be turned vertically from
 # 165 to 15 deg.
 # Where 165 deg = 100 % and 15 deg = 0 %
@@ -18,7 +23,7 @@
 ##################################################
 # Formular for calcutation panel position "Y" is:
 # Y  = ((A - 15) * 150) * 100 [unit: percent]
-###################################################
+##################################################
 ## SETUP ##
 alias solSensorVerti d0 #(for SolarAngle detec.)
 #save Prefab Hash for SolarPanels

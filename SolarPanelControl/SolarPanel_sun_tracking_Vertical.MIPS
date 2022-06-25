@@ -1,0 +1,61 @@
+# This script automatically turns the SolarPanel
+# into the sunlight. One solar sensor is used to
+# detect the position of the sun.
+##################################################
+# Solar sensor has to be placed towars sun rise.
+# Solar pannel has to be placed with electic ports
+# towars sunrise.
+# Param for day/night is "Activate".
+# Where:
+# Activate 0 = day and Activate 1 = night
+###################################################
+# SolarPanel can be turned vertically from
+# 165 to 15 deg.
+# You have to ajust horizontal angle by hand
+# Note: Hozizontal degree changes between
+#          day and night
+###################################################
+## SETUP ##
+alias solSensor d0 #(for SolarAngle detec.)
+#save Prefab Hash for SolarPanels
+alias solarPanelHash r0
+
+# SET HASH FOR PANELS #
+# Hash for SolarPanelDual with one Port
+#move solarPanelHash -2045627372 #<= Dual 1 Port
+# Hash for SolarPanelDual with two Ports
+move solarPanelHash -539224550 #<= Dual 2 Ports
+
+alias dayState r1 # state day
+alias solVertical r2 # vertical deg of sol
+alias solHorizontal r3 # horizontal deg of sol
+alias panelPosVertical r4 #
+
+#rotate all solarPanels into sun
+main:
+yield # wait for 0.5 sec.
+#read out day/night state from sensor. 0 = night
+l dayState solSensor Activate
+# during night solar panel where set to init pos.
+beq dayState 0 setAngle165
+
+#we have day (dayState == 1)
+#let's set Vertical Angle
+# read out solar angle
+l solVertical solSensor Vertical
+#calculate panel position by 180 - X
+sub panelPosVertical 180 solVertical
+j setAngleXY #jump to setAngleXY
+
+
+##sets positon to solar panel to 165 deg
+setAngle165:
+sb solarPanelHash Vertical 165 #for all panles
+j main #jump back to main loop
+
+
+##sets positon to solar panel to panelPosition
+##(calcutated value)
+setAngleXY:
+sb solarPanelHash Vertical panelPosVertical
+j main
