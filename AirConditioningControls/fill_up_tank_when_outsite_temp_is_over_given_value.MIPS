@@ -25,9 +25,10 @@ l tankPressure pipeSensor Pressure # read Pressure
 s db Setting tankPressure # show press at IC housing
 
 # close vent when pressure is reached
-bge tankPressure maxPressure sentVentOff
+bge tankPressure maxPressure setVentOff
 # fillup tank when outdoor temp is warm enough
 bge outDoorTemp minTemp setVentOn
+blt outDoorTemp minTemp setVentOff
 j main
 
 
@@ -37,7 +38,7 @@ s vent On 1
 j main
 
 
-sentVentOff:
+setVentOff:
 s vent Mode 1 # set vent to INWARD
 s vent On 0
 j main
