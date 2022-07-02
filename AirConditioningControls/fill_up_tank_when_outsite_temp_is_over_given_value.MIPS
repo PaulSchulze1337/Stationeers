@@ -1,0 +1,43 @@
+# controll to fill up a tank when temperature is above
+# a given value
+###################################
+alias gasSensor d0 # read outdoor
+alias pipeSensor d1 # read content of cold tank
+alias vent d2 # vent to fill up tank
+
+###################################
+alias outDoorTemp r0 # temp in K
+alias tankPressure r1  # in KPa
+alias minTemp r2 # minimal temp for filling up tank
+alias maxPressure r3   # in KPa
+###################################
+# set max pressure for tank in KPa
+# NOTE: Tank will burst at 60 MPa = 60000 KPa
+move maxPressure 50000
+# set min temperature for fill up tank
+move minTemp 283 # 283 K = 10 C
+###################################
+main:
+yield
+l outDoorTemp gasSensor Temperature # read temp
+#s db Setting outDoorTemp # show temp at IC housing
+l tankPressure pipeSensor Pressure # read Pressure
+s db Setting tankPressure # show press at IC housing
+
+# close vent when pressure is reached
+bge tankPressure maxPressure sentVentOff
+# fillup tank when outdoor temp is warm enough
+bge outDoorTemp minTemp setVentOn
+j main
+
+
+setVentOn:
+s vent Mode 1 # set vent to INWARD
+s vent On 1
+j main
+
+
+sentVentOff:
+s vent Mode 1 # set vent to INWARD
+s vent On 0
+j main

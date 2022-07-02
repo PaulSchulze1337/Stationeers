@@ -5,24 +5,46 @@
 alias gasSensor d0
 alias ACValve d1
 alias maxTemp r0
-alias tempK r0 # temperature in Kelvin
+alias roomTemp r1 # room temp in Kelvin
+alias hysterese r2 # in Kelvin
+alias ventState r3 # vent on or off
+alias targetTemp  # = maxtemp - hysterese
 #  set max temp to 300 Kelvin
 move maxTemp 300
-###########
+#  set hysterese to 5 K
+move hysterese 5
+########################
 main:
-l tempK gasSensor Temperature # read temperature
-round tempK tempK #
-ble tempK maxTemp setValveOff # <=
-bgt tempK maxTemp setValveOn  # >
+yield # wait for 0.5 sec.
+l roomTemp gasSensor Temperature # read temperature
+round roomTemp roomTemp
+# reset targetTemp to maxTemp each loop
+move targetTemp maxTemp
+# add hysterse to target temp, when vent is on
+# branch to addHysterese when ventState > 0
+bgtz ventState addHysterese
+# vent was closed
+j ventControl
 
 
+# add hysterse to target temp, when vent is on
+addHysterese:
+sub targetTemp maxTemp hysterese
+j ventControl
+
+
+ventControl:
+ble roomTemp targetTemp setValveOff # <=
+bgt roomTemp targetTemp setValveOn # >
 j main #jump back to main
 
 
 setValveOn:
 s ACValve On 1 # turn valve on
+move ventState 1 # set vent state on
 j main #jump back to main
 
 setValveOff:
-s ACValve On 0 # turn valve on
+s ACValve On 0 # turn valve off
+move ventState 0 # set vent state off
 j main #jump back to main
