@@ -1,41 +1,46 @@
-# simple climate control
-# temperature
-### setup ###
-# set sensor
-alias gasSensor d0
-alias ACValve d1
-alias maxTemp r0
-alias roomTemp r1 # room temp in Kelvin
+# simple climate control temperature with a
+# adjustable hysterese.
+###################################################
+alias gasSensor d0 # for indoor temp
+alias ACValve d1   # for activate passive cooling
+###################################################
+alias maxTemp r0  # max temp of room
+alias roomTemp r1 # current room temp in Kelvin
 alias hysterese r2 # in Kelvin
 alias ventState r3 # vent on or off
-alias targetTemp  # = maxtemp - hysterese
-#  set max temp to 300 Kelvin
-move maxTemp 300
-#  set hysterese to 5 K
-move hysterese 5
-########################
+alias targetTemp r5  # = maxtemp - hysterese
+####################################################
+#### SETUP VALUES ####
+move maxTemp 300 #  set max temp to 300 Kelvin
+move hysterese 5 #  set hysterese to 5 K
+####################################################
 main:
 yield # wait for 0.5 sec.
 l roomTemp gasSensor Temperature # read temperature
+s db Setting roomTemp # show temp on IC Housing
 round roomTemp roomTemp
 # reset targetTemp to maxTemp each loop
 move targetTemp maxTemp
 # add hysterse to target temp, when vent is on
 # branch to addHysterese when ventState > 0
 bgtz ventState addHysterese
-# vent was closed
+# vent is currently closed
 j ventControl
 
 
 # add hysterse to target temp, when vent is on
+# e.g 295 (targentTemp) = 300 - 5
 addHysterese:
 sub targetTemp maxTemp hysterese
 j ventControl
 
 
 ventControl:
+# set Valve off when roomTemp is below targetTemp
 ble roomTemp targetTemp setValveOff # <=
+# set Valve on when roomTemp is gather them targetT
 bgt roomTemp targetTemp setValveOn # >
+# fallBack condition if something went wrong
 j main #jump back to main
 
 
