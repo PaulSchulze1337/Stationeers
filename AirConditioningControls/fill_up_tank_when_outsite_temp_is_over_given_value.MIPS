@@ -10,6 +10,7 @@ alias outDoorTemp r0 # temp in K
 alias tankPressure r1  # in KPa
 alias minTemp r2 # minimal temp for filling up tank
 alias maxPressure r3   # in KPa
+alias tempValue r4
 ###################################
 # set max pressure for tank in KPa
 # NOTE: Tank will burst at 60 MPa = 60000 KPa
@@ -22,7 +23,10 @@ yield
 l outDoorTemp gasSensor Temperature # read temp
 #s db Setting outDoorTemp # show temp at IC housing
 l tankPressure pipeSensor Pressure # read Pressure
-s db Setting tankPressure # show press at IC housing
+#s db Setting tankPressure # show press at IC house
+l tempValue vent PressureInternal
+s db Setting tempValue
+
 
 # close vent when pressure is reached
 bge tankPressure maxPressure setVentOff
