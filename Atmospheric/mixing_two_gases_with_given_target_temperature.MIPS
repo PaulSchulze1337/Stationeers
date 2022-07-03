@@ -5,6 +5,7 @@ alias pipeCold d1 # pipeAnalyser on Cold site
 alias pipeMixer d2
 alias dial d3 #  to set target temp
 alias display d4 # to show target temp
+alias pipeMix d5 # pipeAnalyser on Mix site
 
 alias hotTemp r0 # Temp in Kelvin
 alias coldTemp r1 # Temp in Kelvin
@@ -20,6 +21,7 @@ alias curTemp r10 # temp for calcuclations
 alias curEnergy r11 # temp for calculations
 alias mixRatio r12 # ratio for gas mixer
 alias dialValue r13 # for target temp
+alias pressureOutput r14 # pressure on output site
 
 define heatCapaCO2 28.2 # heat capacity of CO2
 define heatCapaH2 20.4 # heat capacity of H2
@@ -27,6 +29,7 @@ define heatCapaN2 20.6 # heat capacity of N2
 define heatCapaN2O 23.0 # heat capacity of N2O
 define heatCapaO2 21.1 # heat capacity of O2
 define heatCapaX 24.8 # heat capacity of Polutants
+define maxPressureOut 1000 # KPa = 1 MPa
 
 main:
 yield # pause for 0.5 sec
@@ -34,10 +37,12 @@ l hotTemp pipeHot Temperature # get Hot site temp
 l coldTemp pipeCold Temperature # get cold temp
 l dialValue dial Setting # get target temp from dial
 mul targetTemp dialValue 100
-bge coldTemp hotTemp setMixerOff # safe guard
-bge targetTemp hotTemp setMixerOff # save guard
-blt targetTemp coldTemp setMixerOff # save guard
+bge coldTemp hotTemp setMixerTotalOff # safe guard
+bge targetTemp hotTemp setMixerTotalOff # save guard
+blt targetTemp coldTemp setMixerTotalOff # saveGuard
 s display Setting targetTemp
+l pressureOutput pipeMix Pressure
+bgt pressureOutput maxPressureOut setMixerOff
 move calcHeatCapa 0 # reset for next loop
 # calulacte heat capacity values for hot and cold
 l curRatio pipeHot RatioCarbonDioxide
@@ -102,9 +107,13 @@ mul curHeatCapa curHeatCapa curRatio
 add calcHeatCapa calcHeatCapa curHeatCapa
 j ra # jump back return adress
 
-setMixerOff:
+setMixerTotalOff:
 s pipeMixer On 0 # turn off mixer
 s pipeMixer Setting 0
 s display Setting 404 # show error on display
 s db Setting 404 # show error in IC Housing
+j main
+
+setMixerOff:
+s pipeMixer On 0
 j main
