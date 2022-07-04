@@ -5,7 +5,7 @@ alias pipeCold d1 # pipeAnalyser on Cold site
 alias pipeMixer d2
 alias dial d3 #  to set target temp
 alias display d4 # to show target temp
-alias pipeMix d5 # pipeAnalyser on Mix site
+alias pipeAnalyerMix d5 # pipeAnalyser on Mix site
 
 alias hotTemp r0 # Temp in Kelvin
 alias coldTemp r1 # Temp in Kelvin
@@ -33,6 +33,9 @@ define maxPressureOut 1000 # KPa = 1 MPa
 
 main:
 yield # pause for 0.5 sec
+s pipeHot On 1 # allways on for pipe analyser
+s pipeCold On 1 # allways on for pipe analyser
+s pipeAnalyerMix On 1 # allways on for pipe analyser
 l hotTemp pipeHot Temperature # get Hot site temp
 l coldTemp pipeCold Temperature # get cold temp
 l dialValue dial Setting # get target temp from dial
@@ -41,7 +44,7 @@ bge coldTemp hotTemp setMixerTotalOff # safe guard
 bge targetTemp hotTemp setMixerTotalOff # save guard
 blt targetTemp coldTemp setMixerTotalOff # saveGuard
 s display Setting targetTemp
-l pressureOutput pipeMix Pressure
+l pressureOutput pipeAnalyerMix Pressure
 bgt pressureOutput maxPressureOut setMixerOff
 move calcHeatCapa 0 # reset for next loop
 # calulacte heat capacity values for hot and cold
@@ -116,4 +119,5 @@ j main
 
 setMixerOff:
 s pipeMixer On 0
+s db Setting 303
 j main

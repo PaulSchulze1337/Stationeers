@@ -1,0 +1,24 @@
+# Switch off all gas mixing devices when switch is
+# off
+####################################################
+alias switch d0
+alias pipeMixer d1
+alias display d2
+
+alias switchState r0
+
+main:
+l switchState switch Setting
+s db Setting switchState
+beqz switchState switchOff
+j switchOn
+
+switchOff:
+s pipeMixer On 0
+s display On 0
+j main
+
+switchOn:
+s pipeMixer On 1
+s display On 1
+j main
