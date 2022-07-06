@@ -6,30 +6,18 @@
 # We get a weather warning around 660 seconds
 # before strom.
 ##################################################
-## config ##
 alias debugDisplay d0  # shows time to storm
-#alias debugButton d3 #uncomment thii for debugging
-
 alias timeToStorm r0 # in seconds
 alias speakerIsPlaying r1 # 1 = isPlaying
-
-alias wStaHash r2 #weather station hash
-alias flashLightHash r3
-alias speakerHash r4
-alias activateBtn r5 # for debugging
-
-move wStaHash 1997212478 #weather station hash
-move flashLightHash -1535893860 # flash ligth hash
-move speakerHash -828056979 #Klaxon speaker hash
-
-## debugging tool ##
+alias activateBtn r2 # for debugging
+define wStaHash 1997212478 #weather station hash
+define flashLightHash -1535893860 # flash ligth hash
+define speakerHash -828056979 #Klaxon speaker hash
 # just for speaker testing. Set On to 1.
-sb speakerHash Mode 0 #for alarm1
+sb speakerHash Mode 0 #for alarm
 sb speakerHash On 0
 ##################################################
-
-## programm ##
-main:
+loop:
 yield # pauses for 0.5 seconds
 sb speakerHash Volume 100 # 100 = max
 # load button state for debugging
@@ -60,19 +48,19 @@ beq timeToStorm 100 activateSpeach # = 100 sek
 bge timeToStorm 100 main # >= 100 sek
 # from here timeToStrom is < 100
 bgtz timeToStorm activateAlarm # grater then 0
-j main
+j loop
 
 deactiveAlarm:
 move speakerIsPlaying 0
 sb speakerHash On 0 # turn off speaker
 sb flashLightHash On 0 #turn off warningLight
-j main
+j loop
 
 activateSpeach:
 sb speakerHash Mode 18 # 18 = "StormIncoming"
 sb speakerHash On 1
 sleep 1
-j main
+j loop
 
 
 activateAlarm:
