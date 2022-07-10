@@ -101,6 +101,7 @@ div mixRatio energyCold curEnergy
 mul mixRatio mixRatio 100 # make ratio percent
 round mixRatio mixRatio
 s pipeMixer Setting mixRatio
+s pipeMixer On 1 # turx mixer on
 s db Setting mixRatio
 j main
 
@@ -111,13 +112,14 @@ add calcHeatCapa calcHeatCapa curHeatCapa
 j ra # jump back return adress
 
 setMixerTotalOff:
-s pipeMixer On 0 # turn off mixer
+s pipeMixer On 0 # turn mixer off
 s pipeMixer Setting 0
 s display Setting 404 # show error on display
 s db Setting 404 # show error in IC Housing
 j main
 
 setMixerOff:
-s pipeMixer On 0
-s db Setting 303
+s pipeMixer On 0 # turn mixer off
+#s db Setting 303
+s db Setting pressureOutput
 j main
