@@ -6,7 +6,6 @@
 # We get a weather warning around 660 seconds
 # before strom.
 ##################################################
-alias debugDisplay d0  # shows time to storm
 alias timeToStorm r0 # in seconds
 alias speakerIsPlaying r1 # 1 = isPlaying
 alias activateBtn r2 # for debugging
@@ -29,7 +28,7 @@ sb speakerHash Volume 100 # 100 = max
 lb timeToStorm wStaHash NextWeatherEventTime Minimum
 round timeToStorm timeToStorm
 # display time to storm on a display
-s debugDisplay Setting timeToStorm
+s db Setting timeToStorm
 
 # deactive alarm if time no storm is comming
 beqz timeToStorm deactiveAlarm # equal 0
@@ -45,7 +44,7 @@ beq timeToStorm 300 activateSpeach # = 300 sek
 beq timeToStorm 200 activateSpeach # = 200 sek
 beq timeToStorm 100 activateSpeach # = 100 sek
 # jump back to main if time >= 100
-bge timeToStorm 100 main # >= 100 sek
+bge timeToStorm 100 loop # >= 100 sek
 # from here timeToStrom is < 100
 bgtz timeToStorm activateAlarm # grater then 0
 j loop
@@ -62,12 +61,11 @@ sb speakerHash On 1
 sleep 1
 j loop
 
-
 activateAlarm:
 # jump back to main if speaker is allready playing
-beq speakerIsPlaying 1 main
+beq speakerIsPlaying 1 loop
 # set speaker to playing
 move speakerIsPlaying 1
 sb speakerHash Mode 0 # 0 = Alarm1
 sb speakerHash On 1
-j main
+j loop
