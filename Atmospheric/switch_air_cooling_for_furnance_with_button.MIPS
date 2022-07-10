@@ -1,0 +1,33 @@
+# Switch On/Off air cooling for furnance
+# Cooling is realised in having two active vents
+# witch are blowing air in the furnance room and
+# blowing air outside the furnance room at the
+# same time
+###############################################
+alias switch d0
+alias ventToWorld d1 # vent to exhaut to world
+alias ventToRoom d2 # vent to fill up room
+alias switchState r0
+###############################################
+loop: #main loop
+yield
+jal setSettings # execute setSettings and go forward
+l switchState switch Setting
+s db Setting switchState
+beqz switchState switchOff
+j switchOn
+
+setSettings:
+s ventToWorld Mode 1
+s ventToRoom Mode 1
+j ra # jump back to main loop
+
+switchOff:
+s ventToWorld On 0
+s ventToRoom On 0
+j loop
+
+switchOn:
+s ventToWorld On 1
+s ventToRoom On 1
+j loop
