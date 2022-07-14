@@ -1,4 +1,9 @@
-# fast advanced airlook
+#### fast advanced airlook ####
+# This airlock is operated with extra three 
+# buttons. The buttons are read by BatchLoad. When
+#  OutCylce, the air is pumped back into the room.
+# With the Incyle, the planet atmosphere is first
+# removed and then the airlock is filled.
 ###############################################
 define buttonHash 491845673
 define pressureWorld 2 #KPa (for Mars)
@@ -16,8 +21,8 @@ alias pressureAirlock r2 #KPa
 alias pressureRoom r3 # KPa
 alias pressureFilling r3
 ###############################################
-s outDoor Lock 0 #disable door control
-s inDoor Lock 0 #disable door control
+s outDoor Lock 1 #disable door control
+s inDoor Lock 1 #disable door control
 ###############################################
 move AirLockState 1 # init
 loop: #main loop
