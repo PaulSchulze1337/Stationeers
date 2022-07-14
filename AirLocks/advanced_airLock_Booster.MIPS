@@ -1,0 +1,63 @@
+# boster for fast advanced airlook
+# Setup: Pipe with two active vents.
+# Vent2Pipes => install facing to room
+# Vent2Room2 => install facing airLock
+# connect these two pipes. The pipe is a buffer
+# to fillUp AirLock fast.
+# With Vent2Pipes the buffer will stay at 1000 KPa.
+###############################################
+alias AirLockControl d0 # IC of airLock
+alias Vent2Pipes d1 # to fill up buffer
+alias PipeAnalyserBuffer d2 
+alias Vent2Room2 d3  # to fill up AirLock
+###############################################
+alias airLockState r0 # readed from other IC
+alias pressureBuffer r1 # pressure inside pipes
+###############################################
+define pressureTarget 1000 # KPa for Pipe
+###############################################
+loop: #main loop
+# fill up booster pipes
+l pressureBuffer PipeAnalyserBuffer Pressure #KPa
+# check to fill up pipe buffer
+bleal pressureBuffer pressureTarget fillUpBuffer # <=
+bgtal pressureBuffer pressureTarget stopBufferfill # >
+# read current state from AirLockIC
+l airLockState AirLockControl Setting
+s db Setting airLockState
+beqal airLockState 110 depressureAirLock
+beqal airLockState 220 fillUpAirLock
+beqal airLockState 120 stopfillUp
+beqal airLockState 240 stopfillUp
+beqal airLockState 0 stopfillUp
+j loop
+
+fillUpBuffer:
+s Vent2Pipes Mode 1 # set vent to Inward
+s Vent2Pipes PressureExternal 0
+s Vent2Pipes PressureInternal 50662.5
+s Vent2Pipes On 1 # turns vent on
+j ra # jump back
+
+stopBufferfill:
+s Vent2Pipes On 0 # turns vent on
+j ra # jump back
+
+depressureAirLock:
+s Vent2Room2 Mode 1 # set vent to Inward
+s Vent2Room2 PressureExternal 0
+s Vent2Room2 PressureInternal 50662.5
+s Vent2Room2 On 1 # turns vent on
+j ra # jump back
+
+fillUpAirLock:
+s Vent2Room2 Mode 0 # set vent to OutWards
+s Vent2Room2 PressureExternal 101.325
+s Vent2Room2 PressureInternal 0
+s Vent2Room2 On 1 # turns vent on
+j ra # jump back
+
+stopfillUp:
+s Vent2Room2 On 0 # turns vent on
+j ra  # jump back
+

@@ -1,0 +1,98 @@
+# fast advanced airlook
+###############################################
+define buttonHash 491845673
+define pressureWorld 2 #KPa (for Mars)
+###############################################
+alias outDoor d0 #OuterDoor
+alias inDoor d1 # InnerDoor
+alias sensorAirLock d2 # gas sensor for AirLock
+alias sensorIndoor d3 # gas sensor Indoor
+alias ventToWorld d4 # vent to exhaut to world
+alias ventToRoom d5 # vent to fill up air lock
+###############################################
+alias buttonWasPressed r0 # tempVariable
+alias AirLockState r1 # state of Door
+alias pressureAirlock r2 #KPa
+alias pressureRoom r3 # KPa
+alias pressureFilling r3
+###############################################
+s outDoor Lock 0 #disable door control
+s inDoor Lock 0 #disable door control
+###############################################
+move AirLockState 1 # init
+loop: #main loop
+s db Setting 0 # show ready state at IC
+# read out if a button was pressed
+lb buttonWasPressed buttonHash Setting Maximum
+# just run execute if a button was pressed
+beq buttonWasPressed 1 execute
+j loop #jump to main if no button was pressed
+
+execute:
+yield # wait for 0.5 sek. This is necessary
+#kind of a if-swich
+#run OutCycle if AirLockState is 1
+beq AirLockState 1 OutCycle
+#run InCycle if AirLockState is 0
+beq AirLockState 0 InCycle
+
+
+OutCycle: # going OutWards
+s db Setting 100 # show on IC
+s inDoor Open 0 #close inner door
+sleep 1 # wait to door is closed
+pumpOut:
+s db Setting 110 # show on IC
+l pressureAirlock sensorAirLock Pressure
+s ventToRoom PressureExternal 0
+s ventToRoom PressureInternal 50662.5
+s ventToRoom Mode 1 # set vent to Inward
+s ventToRoom On 1 # turns vent on
+ble pressureAirlock 0 openOutdoor  # <=
+j pumpOut # continute till presure = 0 KPa
+# due to 2 Pa world pressure skip presurise
+openOutdoor:
+s db Setting 120 # show on IC
+sleep 1 # wait
+s db Setting 130 # show on IC
+s ventToRoom On 0 # turns vent off
+s outDoor Open 1 #open outer door
+move AirLockState 0 # save current door state
+j loop
+
+InCycle: # going InWards
+s db Setting 200 # show on IC
+s outDoor Open 0 # close outer door
+sleep 1 # wait to door is closed
+pumpOut2:
+s db Setting 210 # show on IC
+l pressureAirlock sensorAirLock Pressure
+s ventToWorld PressureExternal 0
+s ventToWorld PressureInternal 50662.5
+s ventToWorld Mode 1 # set vent to Inward
+s ventToWorld On 1 # turns vent on
+ble pressureAirlock 0 pumpIn # <=
+j pumpOut2 # continute till presure = 0 KPa
+pumpIn:
+sleep 1
+s db Setting 220 # show on IC
+s ventToWorld On 0 # turns vent off
+# read pressures
+l pressureAirlock sensorAirLock Pressure
+l pressureRoom sensorIndoor Pressure
+# set pressure target pressure -10KPa to room
+sub pressureFilling pressureRoom 10
+# save guard
+max pressureFilling pressureFilling 0
+s ventToRoom PressureExternal 50662.5
+s ventToRoom PressureInternal 0
+s ventToRoom Mode 0 # set vent to Outward
+s ventToRoom On 1 # turns vent on
+bge pressureAirlock pressureFilling openIndoor
+j pumpIn # continute till presure equals room
+openIndoor:
+s db Setting 240 # show on IC
+s ventToRoom On 0 # turns vent off
+s inDoor Open 1 # open inner door
+move AirLockState 1 # save current door state
+j loop #jump to main
