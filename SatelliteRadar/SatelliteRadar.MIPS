@@ -1,0 +1,18 @@
+# Satellite Controll
+############################################
+alias satelliteRadar d0
+alias dialHorizontal d1
+alias dialVertical d2
+
+alias horizontal r0
+alias vertical r1
+
+loop:
+l horizontal dialHorizontal Setting
+l vertical dialVertical Setting
+#s db Setting horizontal
+s satelliteRadar Horizontal horizontal
+s satelliteRadar Vertical vertical
+#s db Setting vertical
+
+j loop
