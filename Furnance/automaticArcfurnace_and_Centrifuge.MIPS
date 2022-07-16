@@ -6,38 +6,49 @@
 alias arcFurnace d0
 alias centrifuge d1
 alias furanceOccupience r0
-alias centrifugeOccupience r1
+alias centriInput r1 # Centrifuge Input Count
+alias centriOutput r2 # Centrifuge Output Count
+alias centriContent r3
 # program #
 main:
+#s db Setting 66
 # loads occupience state of furnance
 ls furanceOccupience arcFurnace 0 Occupied
+s db Setting furanceOccupience
 # loads occupience state of furnance
-ls centrifugeOccupience centrifuge 0 ImportCount
+l centriInput centrifuge ImportCount
+l centriOutput centrifuge ExportCount
+l centriContent centrifuge Reagents
+#s db Setting furanceOccupience
 
 # if occupience = 1 ==> it's occupied! => burn it!
 beqal furanceOccupience 1 turnFurnaceOn
 beqal furanceOccupience 0 turnFurnaceOff
-# if occupience = 1 ==> it's occupied! => centrifuge it!
-bgezal centrifugeOccupience 1 turnCentrifugeOn
-beqal centrifugeOccupience 0 turnCentrifugeOff
-# else
+
+bgtzal centriContent turnCentrifugeOn
+beqzal centriContent turnCentrifugeOff
+
+#bgtal centriInput centriOutput turnCentrifugeOn
+#beqal centriInput centriOutput turnCentrifugeOff
 j main
 
-
 turnFurnaceOn:
+s db Setting 10
 s arcFurnace On 1
 s arcFurnace Activate 1
 j ra
 
 turnFurnaceOff:
+s db Setting 20
 s arcFurnace On 0
 j ra
 
 turnCentrifugeOn:
+s db Setting 30
 s centrifuge On 1
-s centrifuge Activate 1
 j ra
 
 turnCentrifugeOff:
+s db Setting 40
 s centrifuge On 0
 j ra
