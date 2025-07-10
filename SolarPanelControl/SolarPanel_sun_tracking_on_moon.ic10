@@ -1,0 +1,92 @@
+##########################################################################################
+# This script automatically turns the SolarPanel into the sunlight. One solar sensor is
+# used to detect the position of the sun. The position of the sensor and the solar panels
+# are crucial for the correct operation of this script!
+# This script is tested on **Moon** atm.
+##########################################################################################
+# Solar sensor has to be placed horizontally with with electic ports towars sunrise (90°)
+# The solar panel dual has to be placed horizontally with the electric ports towards
+# sunrise to (90°). The logic ports have to be places towards the sunset (270°).
+# This script should work with solar panels with only one port, if you place the port
+# towards sunrise (90°).
+##########################################################################################
+# ATM you have to ajust horizontal angle by hand
+# On Moon this is 89°
+##########################################################################################
+## SETUP ##
+alias solSensor d0 #(for SolarAngle detec.)
+# Hashes for SolarPanels for batch write later
+define solarPanelHash -2045627372 #<= with 1 Ports
+define solarPanelDualHash -539224550 #<= Dual with 2 Ports
+# Variables
+alias verticalSunAngle r1 # vertical deg of sol
+alias horizontalSunAngle r2 # horizontal deg of sol
+alias panelPosVertical r3 #
+alias deltaAngle r4 # for calculating angle after midday
+alias lastVertical r5 # vertical angle from last script cycle
+
+main:
+yield # wait for 1 tick
+# determine state of day by the vertical angle of solar sensor
+# if vertical angle is <= 90 deg, then it is day (otherwise it is night)
+l verticalSunAngle solSensor Vertical
+bge verticalSunAngle 90 resetForNextDay # if vertical angle >= 90, then it is night
+
+# from here we have day
+# Notes:
+# - Vertical angle is +90 deg at sunrise
+# - 0 deg at midday
+# - +90 deg at sunset again
+# frist determine the part of the day (sun is rising or setting)
+# if currentVerticalSunAngle - lastVertical < 0  ==> sun in rising
+# if currentVerticalSunAngle - lastVertical > 0 ==> sun is setting
+# if currentVerticalSunAngle = lastVertical we skip and wait for next cycle
+beq verticalSunAngle lastVertical saveLastVertical # if no change, wait for next cycle
+
+sub deltaAngle verticalSunAngle lastVertical
+bltz deltaAngle calculatePanelPositionWhenSunIsRising # if deltaAngle < 0, sun is rising
+bgtz deltaAngle calculatePanelPositionWhenSunIsSetting # if deltaAngle > 0, sun is setting
+# this should never happen, but just in case
+j main
+
+
+saveLastVertical:
+# save current vertical angle for next cycle.
+# We need this to determine if the sun is rising or setting
+move lastVertical verticalSunAngle
+j main
+
+
+calculatePanelPositionWhenSunIsRising:
+# At the first part of the day, we can calculate
+# the panel position by: verticalSunAngle - 90 deg
+sub panelPosVertical verticalSunAngle 90
+# followed by mutiply by -1 to get a positive value
+mul panelPosVertical panelPosVertical -1
+j setAngleOfSolarPanels
+
+
+calculatePanelPositionWhenSunIsSetting:
+# At the second part of the day, we have to calculate
+# the panel position by: 90 deg + verticalSunAngle
+add panelPosVertical verticalSunAngle 90
+j setAngleOfSolarPanels
+
+
+resetForNextDay:
+# Setup panel position and variables for next day. This part is only executed at night
+move lastVertical 90 # reset last vertical angle to 90, this is the angle at sunrise
+sb solarPanelHash Vertical 15 #for all panles
+sb solarPanelDualHash Vertical 15 #for dual panels
+j main
+
+
+setAngleOfSolarPanels:
+# makes a batch write to all solar panels and sets the vertical angle
+sb solarPanelHash Vertical panelPosVertical
+sb solarPanelDualHash Vertical panelPosVertical
+#write out last vertical angle to the device as Debug
+#s db Setting lastVertical
+j saveLastVertical
+
+# EOF
