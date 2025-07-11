@@ -14,7 +14,7 @@
 # On Moon this is 89°
 ##########################################################################################
 ## SETUP ##
-alias solSensor d0 #(for SolarAngle detec.)
+alias solSensor d0 # (for SolarAngle detec.)
 # Hashes for SolarPanels for batch write later
 define solarPanelHash -2045627372 #<= with 1 Ports
 define solarPanelDualHash -539224550 #<= Dual with 2 Ports
