@@ -51,9 +51,9 @@ j ra # jump back where we came from
 
 setValveToOpen:
 s digitalValve On 1
-j ra
+j ra # jump back where we came from
 
 setValveToClose:
 s digitalValve On 0
-j ra
+j ra # jump back where we came from
 # EOF
