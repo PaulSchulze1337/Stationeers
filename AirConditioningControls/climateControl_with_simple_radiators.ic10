@@ -1,0 +1,40 @@
+##########################################################################################
+# This script opens and closes a digital valve to open and close a pipe connection to some
+# radiators outside. Note this only works on planets with cold night temperatures.
+##########################################################################################
+# Parts: - one radiator inside the room
+#        - one radiator outside the room
+#        - 1 digital valve
+#        - connect both radiators with an insulated pipe and add a digital valve in
+#          between
+#        - one gas sensor to read the indoor temperature
+##########################################################################################
+## SETUP ##
+alias gasSensor d1 # gas sensor to read indoor temperature in Kelvin
+alias digitalValve d2 # digital valve to open and close pipe segment
+alias tempK r0 # temperature in Kelvin
+alias tempC r1 # temperature in Celsius
+#
+define maxTemp 25 # maximum temperature until cooling is activated
+define minTemp 20 # minimum temperature until cooling is deactivated
+##########################################################################################
+coolingProgram:
+yield # wait for 1 cycle
+l tempK gasSensor Temperature # temp in K
+sub tempC tempK 273.15 # convert to Celsius
+round tempC tempC
+s db Setting tempC # FOR DEBUG: Write current temp to housing
+bgt tempC maxTemp setValveToOpen
+ble tempC minTemp setValveToClose
+# this should never happen, but just in case
+j coolingProgram
+
+setValveToOpen:
+s digitalValve On 1
+j coolingProgram
+
+setValveToClose:
+s digitalValve On 0
+j coolingProgram
+
+# EOF
