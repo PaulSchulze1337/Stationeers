@@ -1,13 +1,13 @@
 ##########################################################################################
-# This Script is used to control the filtration system of an atmospheric module.
-# We only want to filter the air if the pressure is above a certain threshold. This is
-# to reduce the wear and tear on the filtration system.
+# This Script is used to control a filtration unit.
+# We only want to filter the air if the pressure is above a certain pressure threshold.
+# as well as cut of filtering if the filters are nearly empty.
 # Note: Gas sensor measures in Pa!!!
 ##########################################################################################
 alias filterUnit db # db refers to the filtration unit
 alias inputPressure r0
-alias filter0Left r1
-alias filter1Left r2
+alias filter0Remains r1
+alias filter1Remains r2
 #
 define MINPRESSURE 25000 # 25kPa
 ##########################################################################################
@@ -15,11 +15,19 @@ define MINPRESSURE 25000 # 25kPa
 main:
 yield # wait for 1 tick
 l inputPressure filterUnit PressureInput
-ls filter0Left filterUnit 0 Quantity # 0 = Gas Filter A
-ls filter1Left filterUnit 1 Quantity # 1 = Gas Filter B
+ls filter0Remains filterUnit 0 Quantity # 0 = Gas Filter A
+ls filter1Remains filterUnit 1 Quantity # 1 = Gas Filter B
+
+### cut of filtering if the filters are nearly empty
+bleal filter0Remains 5 stopFilteringCutOff
+bleal filter1Remains 5 stopFilteringCutOff
 
 bleal inputPressure MINPRESSURE stopFiltering
 bgtal inputPressure MINPRESSURE startFiltering
+j main
+
+stopFilteringCutOff:
+s filterUnit Mode 0
 j main
 
 stopFiltering:
