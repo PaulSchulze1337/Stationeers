@@ -24,17 +24,16 @@ l tempK gasSensor Temperature # temp in K
 sub tempC tempK 273.15 # convert to Celsius
 round tempC tempC
 s db Setting tempC # FOR DEBUG: Write current temp to housing
-bgt tempC maxTemp setValveToOpen
-ble tempC minTemp setValveToClose
-# this should never happen, but just in case
+bgtal tempC maxTemp setValveToOpen
+bleal tempC minTemp setValveToClose
 j coolingProgram
 
 setValveToOpen:
 s digitalValve On 1
-j coolingProgram
+j ra
 
 setValveToClose:
 s digitalValve On 0
-j coolingProgram
+j ra
 
 # EOF
