@@ -1,0 +1,43 @@
+##########################################################################################
+# This Script is used to control a filtration unit to fill up an oxygen canister
+# with autostop.
+# Note: Gas sensor measures in Pa!!!
+##########################################################################################
+alias filterUnit db # db refers to the filtration unit
+alias gasTankStorage d0 # gas tank storage for the oxygen canister
+alias outputPressure r0 # pressure of the output pipe
+alias canisterPressure r1 # use screwdriver to setup up this device
+alias filter0Remains r2
+alias filter1Remains r3
+#
+define MaxPipePressure 8106 # 6kPa,
+define MaxCanisterPressure 8106 # 6kPa, ~ 10,1 kPa is bursting pressure of the canister
+##########################################################################################
+main:
+yield # wait for 1 tick
+l outputPressure filterUnit PressureOutput
+l canisterPressure gasTankStorage Pressure # pressure of the canister
+
+ls filter0Remains filterUnit 0 Quantity # 0 = Gas Filter A
+ls filter1Remains filterUnit 1 Quantity # 1 = Gas Filter B
+
+### cut of filtering if the filters are nearly empty
+ble filter0Remains 5 stopFilteringCutOff
+ble filter1Remains 5 stopFilteringCutOff
+
+bge outputPressure MaxPipePressure stopFilteringCutOff
+bgeal canisterPressure MaxCanisterPressure stopFiltering
+bltal canisterPressure MaxCanisterPressure startFiltering
+j main
+
+stopFilteringCutOff:
+s filterUnit Mode 0
+j main
+
+stopFiltering:
+s filterUnit Mode 0
+j ra
+
+startFiltering:
+s filterUnit Mode 1
+j ra
