@@ -1,7 +1,7 @@
 ##########################################################################################
 # This Script is used to control a filtration unit to fill up an oxygen canister
 # with autostop.
-# Note: Gas sensor measures in Pa!!!
+# Note: Gas sensor measures in kPa!!!
 ##########################################################################################
 alias filterUnit db # db refers to the filtration unit
 alias gasTankStorage d0 # gas tank storage for the oxygen canister
@@ -10,8 +10,8 @@ alias canisterPressure r1 # use screwdriver to setup up this device
 alias filter0Remains r2
 alias filter1Remains r3
 #
-define MaxPipePressure 8106 # 6kPa,
-define MaxCanisterPressure 8106 # 6kPa, ~ 10,1 kPa is bursting pressure of the canister
+define MaxPipePressure 8106 # 8MPa,
+define MaxCanisterPressure 8106 # 8MPa, ~ 10,1 MPa is bursting pressure of the canister
 ##########################################################################################
 main:
 yield # wait for 1 tick

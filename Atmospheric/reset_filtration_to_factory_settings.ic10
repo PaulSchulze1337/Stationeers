@@ -1,0 +1,11 @@
+##########################################################################################
+# This script resets the filtration unit to factory settings. So that it
+# operates without any automatzion.
+##########################################################################################
+alias filterUnit db # db refers to the filtration unit
+
+main:
+s filterUnit Mode 1
+j main
+
+# EOF
