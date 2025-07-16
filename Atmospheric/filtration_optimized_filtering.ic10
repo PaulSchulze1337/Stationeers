@@ -9,7 +9,7 @@ alias inputPressure r0
 alias filter0Remains r1
 alias filter1Remains r2
 #
-define MINPRESSURE 25000 # 25MPa
+define MINPRESSURE 1000 # 1MPa, minimum pressure to start filtering
 ##########################################################################################
 
 main:

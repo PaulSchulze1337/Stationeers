@@ -1,38 +1,75 @@
 ##########################################################################################
 # This Script is used to control a filtration unit to fill up an oxygen canister
 # with autostop.
-# Note: Gas sensor measures in kPa!!!
+# Additionally, it checks the canister type and allows filtering up to a valid pressure.
+# Max pressure of standard canister is 10.1 MPa
+# Max pressure of smart canister is 20.2 MPa
+# Note: At the moment, the volume of the pipe system is not considered. So placing a
+# full standard canister in to storage can result to a pressure above 10.1 MPa!!!
 ##########################################################################################
 alias filterUnit db # db refers to the filtration unit
 alias gasTankStorage d0 # gas tank storage for the oxygen canister
-alias outputPressure r0 # pressure of the output pipe
-alias canisterPressure r1 # use screwdriver to setup up this device
-alias filter0Remains r2
-alias filter1Remains r3
+
+alias outputPipePressure r0 # pressure of the output pipe
+alias canisterPressure r1 # current pressure of the canister
+alias canisterInstalled r2 # canister installed in the gas tank storage
+alias maxPressure r3 # maximum allowed pressure of the canister
+alias filter0Remains r4 # Rest life of the filter in %
+alias filter1Remains r5 # Rest life of the filter in %
+alias canisterHash r6 # hash of the canister installed
+alias isFilteringAllowed r7 # 0 = prohibited, 1 = allowed
+move isFilteringAllowed 0 # set to prohibited by default
 #
-define MaxPipePressure 8106 # 8MPa,
-define MaxCanisterPressure 8106 # 8MPa, ~ 10,1 MPa is bursting pressure of the canister
+move  maxPressure 10 # 10 kPa (default value, will be set later)
+#
+define gasCanisterHash 42280099 # hash of the standard canister, max pressure
+define oxigenCanisterHash -668314370 # hash of the oxygen canister
+define gasCanisterSmartHash -668314371 # hash of the standard canister
+
 ##########################################################################################
 main:
 yield # wait for 1 tick
-l outputPressure filterUnit PressureOutput
-l canisterPressure gasTankStorage Pressure # pressure of the canister
+l outputPipePressure filterUnit PressureOutput # read pressure of the output pipe
+l canisterPressure gasTankStorage Pressure # read pressure of the canister
+ls canisterInstalled gasTankStorage 0 Occupied # is a canister installed?
+ls canisterHash gasTankStorage 0 PrefabHash # hash of the canister installed?
 
-ls filter0Remains filterUnit 0 Quantity # 0 = Gas Filter A
-ls filter1Remains filterUnit 1 Quantity # 1 = Gas Filter B
+ls filter0Remains filterUnit 0 Quantity # 0 = Rest life of Gas Filter A in %
+ls filter1Remains filterUnit 1 Quantity # 1 = Rest life of Gas Filter B in %
 
+### cut of filtering if the canister is not installed
+beqz canisterInstalled stopFilteringCutOff # a = 0
 ### cut of filtering if the filters are nearly empty
-ble filter0Remains 5 stopFilteringCutOff
-ble filter1Remains 5 stopFilteringCutOff
+ble filter0Remains 5 stopFilteringCutOff # a <= b
+ble filter1Remains 5 stopFilteringCutOff # a <= b
 
-bge outputPressure MaxPipePressure stopFilteringCutOff
-bgeal canisterPressure MaxCanisterPressure stopFiltering
-bltal canisterPressure MaxCanisterPressure startFiltering
+# start filtering only if valid canister is installed and filtering is allowed
+move isFilteringAllowed 0 # prohibit filtering by default
+# check if the correct canister is installed:
+beqal canisterHash gasCanisterHash allowFiltering # a = b
+beqal canisterHash oxigenCanisterHash allowFiltering #  a = b
+beqal canisterHash gasCanisterSmartHash allowFiltering # a = b
+### cut off filtering if no valid canister is installed
+beqz isFilteringAllowed stopFilteringCutOff #  a = 0
+# from here we have a valid canister installed and filtering is allowed
+# set up the maximum pressure for each allowed canister
+beqal canisterHash gasCanisterHash setMaxPressure8MPa # standard canister
+beqal canisterHash oxigenCanisterHash setMaxPressure8MPa # oxygen canister
+beqal canisterHash gasCanisterSmartHash setMaxPressure18MPa # smart canister
+# from here we have a valid canister installed and the maximum pressure is set
+bge outputPipePressure maxPressure stopFilteringCutOff  # a >= b
+bgeal canisterPressure maxPressure stopFiltering # a >= b
+bltal canisterPressure maxPressure startFiltering # a < b
 j main
 
 stopFilteringCutOff:
 s filterUnit Mode 0
+move maxPressure 10 # 10 kPa (default value)
 j main
+
+allowFiltering:
+move isFilteringAllowed 1 # allow filtering
+j ra
 
 stopFiltering:
 s filterUnit Mode 0
@@ -40,4 +77,12 @@ j ra
 
 startFiltering:
 s filterUnit Mode 1
+j ra
+
+setMaxPressure8MPa:
+move maxPressure 8106 # 8MPa
+j ra
+
+setMaxPressure18MPa:
+move maxPressure 18106 # 18MPa
 j ra
