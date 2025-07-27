@@ -1,0 +1,37 @@
+##########################################################################################
+# This script controls a combustion in a pipe segment in a contolled manner,
+# to generate hot gas (~ 2000 K) and use it in a furnace or other processes.
+#
+# Be aware: The combustion process takes some time in the pipe segment. Set the
+# flow rate to very conservative values (~ 1 l/sec)!!!
+##########################################################################################
+# All devices has to be placed at the combusting pipe segment.
+alias pipeAnalyser d0
+alias gasPump d1 # small gas pump
+alias igniter d2 #
+
+alias gasPressure r0 # pressure in pipe segment
+define volumeFlowRate 1 # conservative flow rate in l/sec
+define maxPressure 20000 # 20 MPa
+
+main:
+yield # wait for 1 tick
+l gasPressure pipeAnalyser Pressure # read pressure in pipe segment
+
+ble gasPressure maxPressure startCombustion # a <= b
+# now: stop combustion
+s gasPump On 0 # turn off gas pump
+s gasPump Setting 0 # reset gas pump setting
+j main # jump back to main
+
+startCombustion:
+sleep 2 # to slow down the process
+# fill the pipe with a small amount of gas
+s gasPump Setting 1 # reset gas pump setting
+s gasPump On 1 # turn off gas pump
+sleep 2 # to slow down the process
+s gasPump Setting 0 # reset gas pump setting
+s gasPump On 0 # turn off gas pump
+# now ignite the gas
+s igniter Activate 1 # turn on igniter
+j main # jump back to main
