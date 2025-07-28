@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!--  This is a VERY simple web app to remove comments of IC10 Code for Stationeers!
+
+     It removes everything after the first '#' in each line and also removes empty lines.
+     It also counts the number of characters and lines in the input and output.
+
+     Note: There is no style sheet or other external resources used on this page.
+           Good old JavaScript and HTML only! Everything in ONE FILE! This is for PURPOSE!
+           You can run this page locally in your browser without any server.
+
+           Have fun with it!
+
+     Copyright (c) 2025 by Paul Schulze
+
+     This is free software, licensed under the MIT License.
+-->
+
+<style>
+
+h1 {
+    text-align: center;
+    color: darkblue;
+    font-family: Arial, sans-serif;
+    font-size: x-large;
+}
+
+table {
+    width: 100%;
+    box-sizing: border-box;
+  }
+</style>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Stationeers IC10 Compressor Tool</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<h1>Stationeers IC10 Compressor Tool</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>Original</th>
+            <th>Without Comments</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td style="text-align: center;">
+                <span id ="input_chars"
+                      style="font-size: 1em; color: red; font-weight: bold;">0</span> Chars <br>
+                <span id ="input_lines"
+                      style="font-size: 1em; color: red; font-weight: bold;">0</span> Lines
+            </td>
+            <td style="text-align: center;">
+                <span id ="output_chars"
+                      style="font-size: 1em; color: green; font-weight: bold;">0</span> Chars <br>
+                <span id ="output_lines"
+                      style="font-size: 1em; color: green; font-weight: bold;">0</span> Lines
+            </td>
+        </tr>
+
+
+        <tr>
+            <td>
+            <textarea
+                    rows="30"
+                    cols="40"
+                    id="input_textarea"
+                    style="width:46vw; ">
+            </textarea>
+
+            </td>
+            <td>
+                <textarea rows="30"
+                          cols="40"
+                          id="output_textarea"
+                          style="width:46vw; ">
+                </textarea>
+            </td>
+        </tr>
+    </tbody>
+
+    <!-- add two buttons  -->
+    <tfoot>
+        <tr>
+            <td colspan="1" style="text-align: center;">
+                <button id="clear_button">Clear All</button>
+            </td>
+            <td colspan="1" style="text-align: center;">
+                <button id="copy_button">Copy to Clipboard</button>
+            </td>
+        </tr>
+
+    </tfoot>
+
+</table>
+
+
+<script>
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    // add listener for input textarea
+    const inputTextarea = document.getElementById("input_textarea");
+    const outputTextarea = document.getElementById("output_textarea");
+
+    // clean up on first loading of the page
+    inputTextarea.value = "";
+    outputTextarea.value = "";
+
+
+    inputTextarea.addEventListener("input", () => {
+        // Get the input value
+        const inputValue = inputTextarea.value;
+
+        // Process the input value
+        // Search for all lines that have a "#" in them and remove everything after the "#"
+        // and also remove the "#" itself
+        let outputValue = inputValue
+            .split('\n') // Split the input into lines
+            .map(line => {
+                const hashIndex = line.indexOf('#'); // Find the index of the first '#'
+                return hashIndex !== -1 ? line.substring(0, hashIndex).trim() : line.trim(); // Remove everything after '#' and trim whitespace
+            })
+            .join('\n'); // Join the lines back together
+
+
+        // search for all empty lines and remove them
+        outputValue = outputValue
+            .split('\n') // Split the output into lines
+            .filter(line => line.trim() !== '') // Filter out empty lines
+            .join('\n'); // Join the lines back together
+
+
+        outputTextarea.value = outputValue
+        // copy content of output textarea to clipboard
+        navigator.clipboard.writeText(outputValue)
+
+        // count input and output characters and lines
+        const inputChars = inputValue.length;
+        const inputLines = inputValue.split('\n').length;
+        const outputChars = outputValue.length;
+        const outputLines = outputValue.split('\n').length;
+        // update the character and line counts
+        document.getElementById("input_chars").textContent = inputChars;
+        document.getElementById("input_lines").textContent = inputLines;
+        document.getElementById("output_chars").textContent = outputChars;
+        document.getElementById("output_lines").textContent = outputLines;
+
+
+
+    });
+
+    // add listener for clear button
+    const clearButton = document.getElementById("clear_button");
+    clearButton.addEventListener("click", () => {
+        // Clear both textareas
+        inputTextarea.value = "";
+        outputTextarea.value = "";
+    } );
+
+    // add listener for copy button
+    const copyButton = document.getElementById("copy_button");
+    copyButton.addEventListener("click", () => {
+        // Copy the output textarea value to clipboard
+        const outputValue = outputTextarea.value;
+        navigator.clipboard.writeText(outputValue)
+            .then(() => {
+                console.log("Copied to clipboard successfully!");
+            })
+            .catch(err => {
+                console.error("Failed to copy: ", err);
+            });
+    });
+
+    console.log("Finished loading the page and setting up event listeners.");
+});
+
+
+</script>
+
+</body>
+</html>
+

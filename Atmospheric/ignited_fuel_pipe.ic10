@@ -1,6 +1,6 @@
 ##########################################################################################
 # This script controls a combustion in a pipe segment in a contolled manner,
-# to generate hot gas (~ 2000 K) and use it in a furnace or other processes.
+# to generate hot gas (~ 2400 K) and use it in a furnace or other processes.
 #
 # Be aware: The combustion process takes some time in the pipe segment. Set the
 # flow rate to very conservative values (~ 1 l/sec)!!!
@@ -12,6 +12,7 @@ alias igniter d2 #
 
 alias gasPressure r0 # pressure in pipe segment
 define volumeFlowRate 1 # conservative flow rate in l/sec
+# Don't use higher values. This will result in ~ 30 MPa pressure in the pipe segment
 define maxPressure 20000 # 20 MPa
 
 main:

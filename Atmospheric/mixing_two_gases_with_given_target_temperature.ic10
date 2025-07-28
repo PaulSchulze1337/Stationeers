@@ -26,7 +26,7 @@ alias pressureOutput r14 # pressure on output site
 define heatCapaCO2 28.2 # heat capacity of CO2
 define heatCapaH2 20.4 # .. H2
 define heatCapaN2 20.6 # .. N2
-define heatCapaN2O 23.0 # .. N2O
+define heatCapaN2O 37.2 # .. N2O
 define heatCapaO2 21.1 # ..O2
 define heatCapaX 24.8 # .. Polutants
 define maxPressureOut 1000 # KPa = 1 MPa
