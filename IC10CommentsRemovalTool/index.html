@@ -29,7 +29,28 @@ h1 {
 table {
     width: 100%;
     box-sizing: border-box;
-  }
+}
+
+.tableCenter {
+    text-align: center;
+}
+
+textarea {
+    width:46vw
+}
+
+#input_chars,#input_lines {
+    color: red;
+    font-weight: bold;
+    font-size: large;
+}
+
+#output_chars,#output_lines {
+    color: green;
+    font-weight: bold;
+    font-size: large;
+}
+
 </style>
 
 <head>
@@ -51,35 +72,27 @@ table {
     <tbody>
         <tr>
             <td style="text-align: center;">
-                <span id ="input_chars"
-                      style="font-size: 1em; color: red; font-weight: bold;">0</span> Chars <br>
-                <span id ="input_lines"
-                      style="font-size: 1em; color: red; font-weight: bold;">0</span> Lines
+                <span id ="input_chars"> 0 </span> Chars <br>
+                <span id ="input_lines"> 0 </span> Lines
             </td>
             <td style="text-align: center;">
-                <span id ="output_chars"
-                      style="font-size: 1em; color: green; font-weight: bold;">0</span> Chars <br>
-                <span id ="output_lines"
-                      style="font-size: 1em; color: green; font-weight: bold;">0</span> Lines
+                <span id ="output_chars"> 0 </span> Chars <br>
+                <span id ="output_lines"> 0 </span> Lines
             </td>
-        </tr>
-
-
         <tr>
             <td>
-            <textarea
+                <label for="input_textarea"></label><textarea
                     rows="30"
                     cols="40"
-                    id="input_textarea"
-                    style="width:46vw; ">
+                    id="input_textarea">
             </textarea>
 
             </td>
             <td>
+                <label for="output_textarea"></label>
                 <textarea rows="30"
-                          cols="40"
-                          id="output_textarea"
-                          style="width:46vw; ">
+                   cols="40"
+                   id="output_textarea">
                 </textarea>
             </td>
         </tr>
@@ -88,18 +101,15 @@ table {
     <!-- add two buttons  -->
     <tfoot>
         <tr>
-            <td colspan="1" style="text-align: center;">
+            <td colspan="1" class="tableCenter" >
                 <button id="clear_button">Clear All</button>
             </td>
-            <td colspan="1" style="text-align: center;">
+            <td colspan="1" class="tableCenter" >
                 <button id="copy_button">Copy to Clipboard</button>
             </td>
         </tr>
-
     </tfoot>
-
 </table>
-
 
 <script>
 
