@@ -2,6 +2,8 @@
 # This script controls a combustion in a pipe segment in a contolled manner,
 # to generate hot gas (~ 2400 K) and use it in a furnace or other processes.
 #
+# Note: In this script we get the perfect gas mixture from somewhere else.
+#
 # Be aware: The combustion process takes some time in the pipe segment. Set the
 # flow rate to very conservative values (~ 1 l/sec)!!!
 ##########################################################################################
