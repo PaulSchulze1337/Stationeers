@@ -1,8 +1,8 @@
 # Stationeers
 This is just a playground for my little IC programs from Stationeers.
 
-## IC10 Code Compressor Tool (Removes comments and whitespace)
-- [IC10 Code Compressor](IC10CommentsRemovalTool/index.html) (Download and run in your local browser)
+## IC10 Code Minimizer Tool (Removes comments and whitespace)
+- [IC10 Code Minimizer](https://github.com/PaulSchulze1337/stationeers-ic10-code-minimizer) (Download and run in your local browser)
 
 ## usefull links for playing
 * [Stationeers Cheat Sheet for Physics and engineering](https://docs.google.com/spreadsheets/d/1QF-nbW7fUMBaZzKwUp9smkQxVwfxMicF7FhgRFf7-Tw/edit#gid=2130704029)
