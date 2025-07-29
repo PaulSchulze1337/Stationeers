@@ -1,29 +1,24 @@
-# Mixing two different gases to a given target temp
+# Mixing combustion gas (HOT) ~ 2400 K with exhaust gas (EXHAUST) to a given target temperature
+# Note: HOT = Input1; EXHAUST = Input2 !!!
 # Note: name your pipe analyser like: HOT_PIPE, COLD_PIPE, MIXED_PIPE, EXHAUST_PIPE
 # Note: This simplified version depends on a DEFINED HOT Gas from a complete combustion!
-# Note: Works only with a given HOT and COLD gas!
 alias dial d0
 alias display d1 # to show target temp
 alias pipeMixer1 d2
 
 alias hotTemp r0 # T in K
 alias coldTemp r1 # T in K
-alias targetTemp r2 # T in K
-alias currentRatio r3
-alias remainingRatio r4 #
-alias heatCapaExhaust r5 # calculated heat capacity
-alias heatCapaCalulated r6 # for calculation
-alias heatCapaTemp r7 # temporary value
-alias energyHot r8 # temp for calculation
-alias energyCold r9 # temp for calculation
-alias mixRatio r12 # ratio for gas mixer
-alias pressureOutput r14 # pressure on output site
-
-define heatCapaCO2 28.2 # CO2
-define heatCapaN2 20.6 #  N2
-define heatCapaN2O 37.2 # N2O
-define heatCapaO2 21.1 #  O2
-define heatCapaX 24.8 #   Polutants
+alias exhaustTemp r2 # T in K
+alias targetTemp r3 # T in K
+alias currentRatio r4
+alias remain r5 #
+alias heatCapaExhaust r6 # calculated heat capacity
+alias heatCapaCalulated r7 # for calculation
+alias heatCapaTemp r8 # temporary value
+alias exhaustEnergy r9 # temp for calculation
+alias energyHot r10 # temp for calculation
+alias mixRatio r11 # ratio for gas mixer
+alias pressureOutput r12 # pressure on output site
 
 define maxPressureOut 1000 # KPa = 1 MPa
 
@@ -36,77 +31,72 @@ yield
 # set all devices on
 sbn 435685051 HASH("HOT_PIPE") On 1
 sbn 435685051 HASH("COLD_PIPE") On 1
-sbn 435685051 HASH("MIXED_PIPE") On 1
 sbn 435685051 HASH("EXHAUST_PIPE") On 1
-
+sbn 435685051 HASH("MIXED_PIPE") On 1
 lbn hotTemp 435685051 HASH("HOT_PIPE") Temperature Average
 lbn coldTemp 435685051 HASH("COLD_PIPE") Temperature Average
+lbn exhaustTemp 435685051 HASH("EXHAUST_PIPE") Temperature Average
 lbn pressureOutput 435685051 HASH("MIXED_PIPE") Pressure Average
 
 l targetTemp dial Setting
 mul targetTemp targetTemp 100 # dial with value 10 ==> 1000 K
 s display Setting targetTemp
 
-move remainingRatio 1 # reset
+move remain 1 # reset to 100%
 move heatCapaCalulated 0 # reset
 
 lbn currentRatio 435685051 HASH("EXHAUST_PIPE") RatioCarbonDioxide Average
-mul heatCapaTemp heatCapaCO2 currentRatio
+mul heatCapaTemp 28.2 currentRatio
 add heatCapaCalulated heatCapaCalulated heatCapaTemp
-sub remainingRatio remainingRatio currentRatio
-
+sub remain remain currentRatio
 lbn currentRatio 435685051 HASH("EXHAUST_PIPE") RatioNitrogen Average
-mul heatCapaTemp heatCapaN2 currentRatio
+mul heatCapaTemp 20.6 currentRatio
 add heatCapaCalulated heatCapaCalulated heatCapaTemp
-sub remainingRatio remainingRatio currentRatio
-
+sub remain remain currentRatio
 lbn currentRatio 435685051 HASH("EXHAUST_PIPE") RatioNitrousOxide Average
-mul heatCapaTemp heatCapaN2O currentRatio
+mul heatCapaTemp 37.2 currentRatio
 add heatCapaCalulated heatCapaCalulated heatCapaTemp
-sub remainingRatio remainingRatio currentRatio
-
+sub remain remain currentRatio
 lbn currentRatio 435685051 HASH("EXHAUST_PIPE") RatioOxygen Average
-mul heatCapaTemp heatCapaO2 currentRatio
+mul heatCapaTemp 21.1 currentRatio
 add heatCapaCalulated heatCapaCalulated heatCapaTemp
-sub remainingRatio remainingRatio currentRatio
-
+sub remain remain currentRatio
 lbn currentRatio 435685051 HASH("EXHAUST_PIPE") RatioPollutant Average
-mul heatCapaTemp heatCapaX currentRatio
+mul heatCapaTemp 24.8 currentRatio
 add heatCapaCalulated heatCapaCalulated heatCapaTemp
-sub remainingRatio remainingRatio currentRatio
+sub remain remain currentRatio
 
-mul heatCapaTemp heatCapaExhaust remainingRatio
+mul heatCapaTemp heatCapaExhaust remain
 add heatCapaCalulated heatCapaCalulated heatCapaTemp # Final value
 
 # energy_hot = heatCapa * (T_hot - T_out) * T_cold
-sub energyHot hotTemp targetTemp
-mul energyHot heatCapaHot energyHot
-mul energyHot energyHot coldTemp #
+sub exhaustEnergy exhaustTemp targetTemp
+mul exhaustEnergy heatCapaCalulated exhaustEnergy
+mul exhaustEnergy exhaustEnergy hotTemp #
 # energy_cold = heatCapa * (T_out - T_cold) * T_Hot
-sub energyCold targetTemp coldTemp
-mul energyCold energyCold heatCapaCold
-mul energyCold energyCold hotTemp #
+sub energyHot targetTemp hotTemp
+mul energyHot heatCapaCold energyHot
+mul energyHot energyHot exhaustTemp #
 # mixRatio = energyCold / (energyHot-energyCold)
-add mixRatio energyHot energyCold
-div mixRatio energyCold mixRatio
+add mixRatio exhaustEnergy energyHot
+div mixRatio energyHot mixRatio
 mul mixRatio mixRatio 100 # make it %
+# IMPORTANT invert mixRatio to 100 - mixRatio
+sub mixRatio 100 mixRatio
+s pipeMixer1 Setting mixRatio
+s db Setting mixRatio
 
-s db Setting energyHot
+bge exhaustTemp hotTemp setMixerTotalOff # a>=b
+bge targetTemp hotTemp setMixerTotalOff # a>=b
+blt targetTemp exhaustTemp setMixerTotalOff # a<b
+bgt pressureOutput maxPressureOut setMixerOff # a>b
 
-bge coldTemp hotTemp setMixerTotalOff # coldT > hotT, turn off mixer
-bge targetTemp hotTemp setMixerTotalOff # out of range, turn off mixer
-blt targetTemp coldTemp setMixerTotalOff # out of range, turn off mixer
-bgt pressureOutput maxPressureOut setMixerOff # pressure too high, turn off mixer
-
-s pipeMixer1 Setting 13
-s pipeMixer1 On 0 # turn off
+s pipeMixer1 On 1 # turn off
 j main
 
 setMixerTotalOff:
 s pipeMixer1 On 0 # turn off
-s pipeMixer1 Setting 0
 s display Setting 404 # show error
-s db Setting 404 # show error
 j main
 
 setMixerOff:
