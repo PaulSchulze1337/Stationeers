@@ -1,7 +1,22 @@
-# Mixing three different gases to a given target temp
-# HOT ~ 2400 K (Combustion gas!); EXHAUST (vary); COLD  ~ 300 K (CO2!)
-# Note: name your pipe analyser like: HOT_PIPE, COLD_PIPE, MIXED_PIPE, EXHAUST_PIPE
-# Note: This simplified version depends on a DEFINED GASES!
+##########################################################################################
+# YOU HAVE TO REMOVE ALL COMMENTS TO FIT THIS SNIPPET INTO THE IC10!
+# Minimizer: https://github.com/PaulSchulze1337/stationeers-ic10-code-minimizer
+##########################################################################################
+# MIXING THREE GASES TO A GIVEN TARGET TEMPERATURE. THIS SCRIPT DEPENGS ON DEFINED GASES!
+# - HOT Gas (combustion gas!) ~ 2400 K
+# - EXHAUST Gas (can very in components and temperature) ~ 300 K
+# - COLD Gas (CO2!) ~ 300 K or higher
+#
+# - Name your pipe analyser like: HOT_PIPE, COLD_PIPE, MIXED_PIPE, EXHAUST_PIPE
+#
+#  You may need to adjust the mixing ratio by sub 100, or uncomment it below.
+#  MIXER_HOT_EXHAUST = Input1 (HOT), Input2 (EXHAUST)
+#  MIXER_COLD_EXHAUST = Input1 (EXHAUST), Input2 (COLD)
+#
+#  Connect the MIXED_PIPE to a furnace and both MIXER to this mixed pipe.
+#  Connect a HOT_PIPE and a EXHAUST_PIPE to the MIXER_HOT_EXHAUST.
+#  Connect a COLD_PIPE and a EXHAUST_PIPE to the MIXER_COLD_EXHAUST.
+##########################################################################################
 alias dial d0
 alias display d1 # to show target temp
 alias mixHotExhaust d2 # (HOT + EXHAUST)
@@ -16,11 +31,15 @@ alias remain r5 #
 alias heatCapaExhaust r6 # calculated heat capacity
 alias heatCapaCalulated r7 # for calculation
 alias heatCapaTemp r8 # temporary value
-alias exhaustEnergy r9 # temp for calculation
-alias energyHot r10 # temp for calculation
-alias mixRatioHE r11 # ratio for gas mixer
-alias pressureOutput r12 # pressure on output site
 
+alias exhaustEnergy r9 # temp for calculation
+alias energySecondGas r10 # temp for calculation
+alias mixRatio r11 # ratio for gas mixer
+
+alias secondGasTemp r12
+alias secondGasCapa r13
+
+alias pressureOutput r14 # pressure on output site
 define maxPressureOut 1000 # KPa = 1 MPa
 
 define heatCapaHot 27.08 # ideal combustion gas
@@ -42,6 +61,10 @@ lbn pressureOutput 435685051 HASH("MIXED_PIPE") Pressure Average
 l targetTemp dial Setting
 mul targetTemp targetTemp 100 # dial with value 10 ==> 1000 K
 s display Setting targetTemp
+
+# Frist check if we are able to mix the gases
+blt targetTemp coldTemp setMixerTotalOff # a<b
+bgt targetTemp hotTemp setMixerTotalOff # a>b
 
 move remain 1 # reset to 100%
 move heatCapaCalulated 0 # reset
@@ -70,36 +93,60 @@ sub remain remain currentRatio
 mul heatCapaTemp heatCapaExhaust remain
 add heatCapaCalulated heatCapaCalulated heatCapaTemp # Final value
 
+bltal targetTemp exhaustTemp calcWithCold # a<b EXHAUST+COLD
+bgeal targetTemp exhaustTemp calcWithHot # a>=b EXHAUST+HOT
+
 # energy_hot = heatCapa * (T_hot - T_out) * T_cold
 sub exhaustEnergy exhaustTemp targetTemp
 mul exhaustEnergy heatCapaCalulated exhaustEnergy
-mul exhaustEnergy exhaustEnergy hotTemp #
+mul exhaustEnergy exhaustEnergy secondGasTemp #
+
 # energy_cold = heatCapa * (T_out - T_cold) * T_Hot
-sub energyHot targetTemp hotTemp
-mul energyHot heatCapaCold energyHot
-mul energyHot energyHot exhaustTemp #
+sub energySecondGas targetTemp secondGasTemp
+mul energySecondGas secondGasCapa energySecondGas
+mul energySecondGas energySecondGas exhaustTemp #
 # mixRatio = energyCold / (energyHot-energyCold)
-add mixRatioHE exhaustEnergy energyHot
-div mixRatioHE energyHot mixRatioHE
-mul mixRatioHE mixRatioHE 100 # make it %
+add mixRatio exhaustEnergy energySecondGas
+div mixRatio energySecondGas mixRatio
+mul mixRatio mixRatio 100 # make it %
 # IMPORTANT: INPUT1 = EXHAUST, INPUT2 = HOT
-sub mixRatioHE 100 mixRatioHE
-s mixHotExhaust Setting mixRatioHE
-s db Setting mixRatioHE
 
-bge exhaustTemp hotTemp setMixerTotalOff # a>=b
-bge targetTemp hotTemp setMixerTotalOff # a>=b
-blt targetTemp exhaustTemp setMixerTotalOff # a<b
+s db Setting mixRatio
 bgt pressureOutput maxPressureOut setMixerOff # a>b
-
-s mixHotExhaust On 1 # turn off
+bgeal targetTemp exhaustTemp setMixExhaustWHot # a>=b
+bltal targetTemp exhaustTemp setMixExhaustWCold # a<b EXHAUST+COLD
+# just to be sure
 j main
 
 setMixerTotalOff:
 s mixHotExhaust On 0 # turn off
+s mixColdExhaust On 0 # turn off
 s display Setting 404 # show error
 j main
 
 setMixerOff:
 s mixHotExhaust On 0 # turn off
+s mixColdExhaust On 0 # turn off
 j main
+
+calcWithHot:
+move secondGasTemp hotTemp
+move secondGasCapa heatCapaHot
+j ra
+
+calcWithCold:
+move secondGasTemp coldTemp
+move secondGasCapa heatCapaCold
+j ra
+
+setMixExhaustWHot:
+sub mixRatio 100 mixRatio
+s mixHotExhaust Setting mixRatio
+s mixHotExhaust On 1 # turn on
+j main
+
+setMixExhaustWCold:
+s mixColdExhaust Setting mixRatio
+s mixColdExhaust On 1 # turn on
+j main
+
