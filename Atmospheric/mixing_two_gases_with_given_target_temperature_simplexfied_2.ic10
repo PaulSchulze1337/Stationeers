@@ -1,23 +1,24 @@
-# Mixing two different gases to a given target temp
+# Mixing three different gases to a given target temp
+# HOT ~ 2400 K (Combustion gas!); EXHAUST (vary); COLD  ~ 300 K (CO2!)
 # Note: name your pipe analyser like: HOT_PIPE, COLD_PIPE, MIXED_PIPE, EXHAUST_PIPE
-# Note: This simplified version depends on a DEFINED HOT Gas from a complete combustion!
-# Note: Works only with a given HOT and COLD gas!
+# Note: This simplified version depends on a DEFINED GASES!
 alias dial d0
 alias display d1 # to show target temp
-alias pipeMixer1 d2
+alias mixHotExhaust d2 # (HOT + EXHAUST)
+alias mixColdExhaust d3 # (COLD + EXHAUST)
 
 alias hotTemp r0 # T in K
 alias coldTemp r1 # T in K
 alias exhaustTemp r2 # T in K
 alias targetTemp r3 # T in K
 alias currentRatio r4
-alias remainingRatio r5 #
+alias remain r5 #
 alias heatCapaExhaust r6 # calculated heat capacity
 alias heatCapaCalulated r7 # for calculation
 alias heatCapaTemp r8 # temporary value
-alias energyHot r9 # temp for calculation
-alias energyCold r10 # temp for calculation
-alias mixRatio r11 # ratio for gas mixer
+alias exhaustEnergy r9 # temp for calculation
+alias energyHot r10 # temp for calculation
+alias mixRatioHE r11 # ratio for gas mixer
 alias pressureOutput r12 # pressure on output site
 
 define maxPressureOut 1000 # KPa = 1 MPa
@@ -42,69 +43,63 @@ l targetTemp dial Setting
 mul targetTemp targetTemp 100 # dial with value 10 ==> 1000 K
 s display Setting targetTemp
 
-move remainingRatio 1 # reset
+move remain 1 # reset to 100%
 move heatCapaCalulated 0 # reset
 
 lbn currentRatio 435685051 HASH("EXHAUST_PIPE") RatioCarbonDioxide Average
 mul heatCapaTemp 28.2 currentRatio
 add heatCapaCalulated heatCapaCalulated heatCapaTemp
-sub remainingRatio remainingRatio currentRatio
-
+sub remain remain currentRatio
 lbn currentRatio 435685051 HASH("EXHAUST_PIPE") RatioNitrogen Average
 mul heatCapaTemp 20.6 currentRatio
 add heatCapaCalulated heatCapaCalulated heatCapaTemp
-sub remainingRatio remainingRatio currentRatio
-
+sub remain remain currentRatio
 lbn currentRatio 435685051 HASH("EXHAUST_PIPE") RatioNitrousOxide Average
 mul heatCapaTemp 37.2 currentRatio
 add heatCapaCalulated heatCapaCalulated heatCapaTemp
-sub remainingRatio remainingRatio currentRatio
-
+sub remain remain currentRatio
 lbn currentRatio 435685051 HASH("EXHAUST_PIPE") RatioOxygen Average
 mul heatCapaTemp 21.1 currentRatio
 add heatCapaCalulated heatCapaCalulated heatCapaTemp
-sub remainingRatio remainingRatio currentRatio
-
+sub remain remain currentRatio
 lbn currentRatio 435685051 HASH("EXHAUST_PIPE") RatioPollutant Average
 mul heatCapaTemp 24.8 currentRatio
 add heatCapaCalulated heatCapaCalulated heatCapaTemp
-sub remainingRatio remainingRatio currentRatio
+sub remain remain currentRatio
 
-mul heatCapaTemp heatCapaExhaust remainingRatio
+mul heatCapaTemp heatCapaExhaust remain
 add heatCapaCalulated heatCapaCalulated heatCapaTemp # Final value
 
 # energy_hot = heatCapa * (T_hot - T_out) * T_cold
-sub energyHot exhaustTemp targetTemp
-mul energyHot heatCapaCalulated energyHot
-mul energyHot energyHot coldTemp #
+sub exhaustEnergy exhaustTemp targetTemp
+mul exhaustEnergy heatCapaCalulated exhaustEnergy
+mul exhaustEnergy exhaustEnergy hotTemp #
 # energy_cold = heatCapa * (T_out - T_cold) * T_Hot
-sub energyCold targetTemp coldTemp
-mul energyCold heatCapaCold energyCold
-mul energyCold energyCold exhaustTemp #
+sub energyHot targetTemp hotTemp
+mul energyHot heatCapaCold energyHot
+mul energyHot energyHot exhaustTemp #
 # mixRatio = energyCold / (energyHot-energyCold)
-add mixRatio energyHot energyCold
-div mixRatio energyCold mixRatio
-mul mixRatio mixRatio 100 # make it %
+add mixRatioHE exhaustEnergy energyHot
+div mixRatioHE energyHot mixRatioHE
+mul mixRatioHE mixRatioHE 100 # make it %
+# IMPORTANT: INPUT1 = EXHAUST, INPUT2 = HOT
+sub mixRatioHE 100 mixRatioHE
+s mixHotExhaust Setting mixRatioHE
+s db Setting mixRatioHE
 
-s db Setting mixRatio
+bge exhaustTemp hotTemp setMixerTotalOff # a>=b
+bge targetTemp hotTemp setMixerTotalOff # a>=b
+blt targetTemp exhaustTemp setMixerTotalOff # a<b
+bgt pressureOutput maxPressureOut setMixerOff # a>b
 
-bge coldTemp hotTemp setMixerTotalOff # coldT > hotT, turn off mixer
-bge targetTemp hotTemp setMixerTotalOff # out of range, turn off mixer
-blt targetTemp coldTemp setMixerTotalOff # out of range, turn off mixer
-bgt pressureOutput maxPressureOut setMixerOff # pressure too high, turn off mixer
-
-s pipeMixer1 Setting mixRatio
-s pipeMixer1 On 1 # turn off
+s mixHotExhaust On 1 # turn off
 j main
 
 setMixerTotalOff:
-s pipeMixer1 On 0 # turn off
-s pipeMixer1 Setting 0
+s mixHotExhaust On 0 # turn off
 s display Setting 404 # show error
-s db Setting 404 # show error
 j main
 
 setMixerOff:
-s pipeMixer1 On 0 # turn off
+s mixHotExhaust On 0 # turn off
 j main
-
