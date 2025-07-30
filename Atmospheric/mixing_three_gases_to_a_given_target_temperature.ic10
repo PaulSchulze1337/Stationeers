@@ -4,7 +4,7 @@
 ##########################################################################################
 # MIXING THREE GASES TO A GIVEN TARGET TEMPERATURE. THIS SCRIPT DEPENGS ON DEFINED GASES!
 # - HOT Gas (combustion gas!) ~ 2400 K
-# - EXHAUST Gas (can very in components and temperature) ~ 300 K
+# - EXHAUST Gas (can very in components and temperature) ~ something between 300 K and 2400 K
 # - COLD Gas (CO2!) ~ 300 K or higher
 #
 # - Name your pipe analyser like: HOT_PIPE, COLD_PIPE, MIXED_PIPE, EXHAUST_PIPE
