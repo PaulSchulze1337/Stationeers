@@ -1,46 +1,52 @@
 ################################
 # The room pressure can be changed by using a
-# turbo pump. The preferred air pressure is set 
+# turbo pump. The preferred air pressure is set
 # via a rotary switch.
 ################################
 ## config ##
-alias pump d0 # turbo pumpo
+alias activeVent d0 # turbo pumpo
 alias airSensor d1 #air pressure/temp sensor
 alias dial d2 # for setting target pressure
+alias display d3 # for showing error messages
+
 alias targetPressure r0 # read out from dial
 alias currentPressure r1 # read out from sensor
 #set save defaults for pump #
-s pump Setting 50 # volume l/s
-s pump Mode 0 # 0 = outWards
-s pump On 0
 
 main:
 yield # wait for 0.5 sec.
-# load value from dial. This Value is interpreted
-# as target value for air pressure inside box
+s activeVent PressureInternal 200
+s activeVent PressureExternal 2
+
 l targetPressure dial Setting
-# load current pressure from sensor
+mul targetPressure targetPressure 10 # dial with value 10 ==> 100 KPa
+s display Setting targetPressure
+
 l currentPressure airSensor Pressure
 round currentPressure currentPressure
 
-# if airPressure above dial setting: pump out
-bgt currentPressure targetPressure pumpOut
-# if airPressure below dial setting: pump in
-blt currentPressure targetPressure pumpIn
+s db Setting currentPressure
+
+bgt currentPressure targetPressure pumpIn    # a>b
+blt currentPressure targetPressure pumpOut   # a<b
+
 # do nothing when airPressure equal dial setting
 j pumpStop
 
-
 pumpOut:
-s pump On 1
-s pump Mode 0 # 0 = outWards
+s activeVent PressureExternal 20000
+s activeVent PressureInternal 1
+s activeVent Mode 0 # set vent to Inward
+s activeVent On 1 # turn vent on
 j main
 
 pumpIn:
-s pump On 1
-s pump Mode 1 # 1 = InWards
+s activeVent PressureExternal 1
+s activeVent PressureInternal 20000
+s activeVent Mode 1 # set vent to OutWards
+s activeVent On 1 # turn vent on
 j main
 
 pumpStop:
-s pump On 0
+s activeVent On 0 # turn off the pump
 j main

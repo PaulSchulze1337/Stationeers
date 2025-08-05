@@ -40,7 +40,7 @@ alias secondGasTemp r12
 alias secondGasCapa r13
 
 alias pressureOutput r14 # pressure on output site
-define maxPressureOut 1000 # KPa = 1 MPa
+define maxPressureOut 5000 # KPa = 1 MPa
 
 define heatCapaHot 27.08 # ideal combustion gas
 move heatCapaExhaust 26 # approx exhaust, highly fluctuating
@@ -111,7 +111,7 @@ div mixRatio energySecondGas mixRatio
 mul mixRatio mixRatio 100 # make it %
 # IMPORTANT: INPUT1 = EXHAUST, INPUT2 = HOT
 
-s db Setting mixRatio
+s db Setting pressureOutput
 bgt pressureOutput maxPressureOut setMixerOff # a>b
 bgeal targetTemp exhaustTemp setMixExhaustWHot # a>=b
 bltal targetTemp exhaustTemp setMixExhaustWCold # a<b EXHAUST+COLD
@@ -140,7 +140,7 @@ move secondGasCapa heatCapaCold
 j ra
 
 setMixExhaustWHot:
-sub mixRatio 100 mixRatio
+#sub mixRatio 100 mixRatio
 s mixHotExhaust Setting mixRatio
 s mixHotExhaust On 1 # turn on
 j main
