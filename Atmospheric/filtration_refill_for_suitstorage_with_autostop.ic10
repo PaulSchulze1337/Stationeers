@@ -1,0 +1,41 @@
+##########################################################################################
+# This Script is used to control a filtration unit to fill up an oxigen or nitrogen
+# canister for the suit storage, with autostop.
+##########################################################################################
+# Components needed:
+# - 2 filtration units (db) and one ic10 for each of them
+##########################################################################################
+alias filterUnit db # db refers to the filtration unit
+
+alias outputPipePressure r0 # pressure of the output pipe
+alias maxPressure r3 # maximum allowed pressure of the canister
+alias filter0Remains r4 # Rest life of the filter in %
+alias filter1Remains r5 # Rest life of the filter in %
+#
+move  maxPressure 7000 # 7 MPa (default value, will be set later)
+
+main:
+yield # wait for 1 tick
+l outputPipePressure filterUnit PressureOutput # read pressure of the output pipe
+ls filter0Remains filterUnit 0 Quantity # 0 = Rest life of Gas Filter A in %
+ls filter1Remains filterUnit 1 Quantity # 1 = Rest life of Gas Filter B in %
+
+# cut off filtering if the filters are nearly empty
+ble filter0Remains 5 stopFilteringCutOff # a <= b
+ble filter1Remains 5 stopFilteringCutOff # a <= b
+
+bgeal outputPipePressure maxPressure stopFiltering  # a >= b
+bltal outputPipePressure maxPressure startFiltering # a < b
+j main
+
+stopFilteringCutOff:
+s filterUnit Mode 0
+j main
+
+stopFiltering:
+s filterUnit Mode 0
+j ra
+
+startFiltering:
+s filterUnit Mode 1
+j ra
